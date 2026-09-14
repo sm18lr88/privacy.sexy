@@ -684,7 +684,7 @@ actions:
                       parameters:
                         command: az
                         code: |-
-                          az logout 2&> /dev/null
+                          az logout &> /dev/null
                           az account clear
                           rm -fv ~/.azure/accessTokens.json
       -
@@ -716,11 +716,11 @@ actions:
                 docs: This script clears the temporary cache and does not cause any user data loss.
                 code: |-
                   # Global installation
-                  rm -rfv /.cache/epiphany/*
+                  rm -rfv -- "$HOME/.cache/epiphany/"*
                   # Flatpak installation
-                  rm -rfv ~/.var/app/org.gnome.Epiphany/cache/*
+                  rm -rfv -- "$HOME/.var/app/org.gnome.Epiphany/cache/"*
                   # Snap installation
-                  rm -rfv ~/~/snap/epiphany/common/.cache/*
+                  rm -rfv -- "$HOME/snap/epiphany/common/.cache/"*
               -
                 name: Clear GNOME Web browsing history
                 recommend: strict
@@ -1343,13 +1343,16 @@ actions:
               pip (Python package manager) [3], or Google Chrome and Chromium-based browsers.
               Deleting this cache does not affect sandboxed applications, e.g., those that are installed using Snap or Flatpak.
 
+              This script clears the default `$HOME/.cache` location and root's `/root/.cache` directory.
+              It does not follow a customized `XDG_CACHE_HOME`. Root cache enumeration requires `sudo`.
+
               [1]: https://web.archive.org/web/20221029151712/https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html "XDG Base Directory Specification | specifications.freedesktop.org"
               [2]: https://web.archive.org/web/20221029154505/https://wiki.archlinux.org/title/KDE#Clean_cache_to_resolve_upgrade_problems "KDE - ArchWiki | wiki.archlinux.org"
               [3]: https://web.archive.org/web/20221029154542/https://pip.pypa.io/en/stable/topics/caching/#default-paths "Caching - pip documentation v22.2.2 | pip.pypa.io"
               [4]: https://web.archive.org/web/20221029154556/https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#Linux "Chromium Docs - User Data Directory | chromium.googlesource.com"
             code: |-
-              rm -rfv ~/.cache/*
-              sudo rm -rfv root/.cache/*
+              rm -rfv -- "$HOME/.cache/"*
+              sudo find /root/.cache -mindepth 1 -maxdepth 1 -exec rm -rfv -- {} +
           -
             name: Clear system-wide cache
             docs: |-
@@ -3636,11 +3639,11 @@ functions:
           import sqlite3
           import glob
           import sys
-
-          database_name   = 'places.sqlite'
-          table_name      = 'moz_inputhistory' # moz_historyvisits, moz_places
-
-          home_dir = f'/home/{os.getenv("SUDO_USER", os.getenv("USER"))}'
+          import pwd
+          from contextlib import closing
+          database_name = '{{ $databaseFileName }}'
+          table_name = '{{ $tableName }}'
+          home_dir = pwd.getpwnam(os.environ['SUDO_USER']).pw_dir if os.getenv('SUDO_USER') else os.path.expanduser('~')
           database_globs = [
               # Global installation
               f'{home_dir}/.mozilla/firefox/*/{database_name}',
@@ -3657,12 +3660,13 @@ functions:
           for file in database_files:
               print(f'Cleaning "{table_name}" in: {file}')
               try:
-                  conn = sqlite3.connect(file)
-                  cursor = conn.cursor()
-                  cursor.execute(f'DELETE from {table_name}')
-                  total_deleted = cursor.rowcount
+                  with closing(sqlite3.connect(file)) as conn:
+                      cursor = conn.cursor()
+                      cursor.execute(f'DELETE from {table_name}')
+                      conn.commit()
+                      total_deleted = cursor.rowcount
                   print(f'Table was empty, no items were deleted.' if total_deleted == 0 else f'Total deleted items: {cursor.rowcount}')
-              except Exception as e:
+              except sqlite3.Error as e:
                   print(f'Failed to delete: {e}', file=sys.stderr)
   -
     name: DeleteFileFromThunderbirdProfiles
@@ -3671,9 +3675,9 @@ functions:
     code: |-
       # {{ $file }}: Global installation
       rm -fv ~/.thunderbird/*/{{ $file }}
-      # {{ $file }}: Flatpak installation
-      rm -fv ~/snap/thunderbird/common/.thunderbird/*/{{ $file }}
       # {{ $file }}: Snap installation
+      rm -fv ~/snap/thunderbird/common/.thunderbird/*/{{ $file }}
+      # {{ $file }}: Flatpak installation
       rm -fv ~/.var/app/org.mozilla.Thunderbird/.thunderbird/*/{{ $file }}
   -
     name: DeleteFileFromGNOMEWebData
@@ -3798,6 +3802,7 @@ functions:
         echo "Skipping, \"$job_name\" cronjob is not found."
       fi
     revertCode: |-
+      job_name='{{ $jobName }}'
       cronjob_path="/etc/cron.daily/$job_name"
       if [[ -f "$cronjob_path" ]]; then
         if [[ -x "$cronjob_path" ]]; then

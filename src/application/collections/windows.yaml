@@ -1809,31 +1809,16 @@ actions:
                                         name: Clear "Cryptographic Services" diagnostic traces
                                         recommend: standard
                                         docs: |-
-                                            This script removes specific files associated with the "Cryptographic Services".
-                                            The files include:
-
-                                            - `%SYSTEMROOT%\System32\catroot2\dberr.txt`
-                                            - `%SYSTEMROOT%\System32\catroot2.log`
-                                            - `%SYSTEMROOT%\System32\catroot2.jrs`
-                                            - `%SYSTEMROOT%\System32\catroot2.edb`
-                                            - `%SYSTEMROOT%\System32\catroot2.chk`
+                                            This script removes the diagnostic error log `%SYSTEMROOT%\System32\catroot2\dberr.txt`.
+                                            It does not reset the Cryptographic Services database or delete its transaction and recovery files.
 
                                             The "Cryptographic Services" (`CryptSvc`) service manages services such as key management for the computer [1] [2].
                                             This service is used by different features, including Windows Updates [3] [4] [5].
 
-                                            There is no official documentation available for these files from Microsoft. However, after analyzing the internal workings of Windows, below
-                                            is a detailed explanation of the purpose, collected data, and privacy implications for each file:
-
-                                            | File name | Purpose | Data Collected | Privacy Implications |
-                                            | --------- | ------- | -------------- | -------------------- |
-                                            | `dberr.txt` | Logging database errors | Error messages and codes related to database operations | Potential system issues or vulnerabilities |
-                                            | `catroot2.log` | Logging activities, errors, or transactions related to cryptographic operations | Log data including status messages, error codes | System configurations and vulnerabilities |
-                                            | `catroot2.jrs` | Journal file for data integrity in cryptographic operations | Transaction logs or temporary cryptographic data | System's state and cryptographic operations |
-                                            | `catroot2.edb` | Storing certificate and signature data for Windows Update | Certificate and signature validation data, update details | Update history and security state |
-                                            | `catroot2.chk` | Ensuring data consistency in the ESE database | Information for database recovery | System state information |
-
-                                            This script deletes these files, improving user privacy by removing sensitive information related to system configurations, vulnerabilities, and
-                                            cryptographic operations is not readily available.
+                                            Database, checkpoint, reserved-log, and transaction-log files are not treated as disposable diagnostic traces.
+                                            Resetting Windows Update components is a separate troubleshooting procedure [3], not routine privacy cleanup.
+                                            Removing this error log loses troubleshooting history and cannot be reverted.
+                                            If the log is in use or access is denied, deletion may fail; this script does not stop Cryptographic Services.
 
                                             [1]: https://web.archive.org/web/20231025233132/https://www.windows-security.org/windows-service/cryptographic-services "Cryptographic Services | Windows security encyclopedia | windows-security.org"
                                             [2]: https://web.archive.org/web/20231025233145/https://revertservice.com/10/cryptsvc/ "Cryptographic Services (CryptSvc) Defaults in Windows 10 | revertservice.com"
@@ -1841,26 +1826,9 @@ actions:
                                             [4]: https://web.archive.org/web/20231025233228/https://support.microsoft.com/en-us/topic/claims-to-windows-token-service-c2wts-not-starting-after-rebooting-server-52a2d131-cb9d-bf28-77d4-1663a99d03b3 "Claims to Windows Token Service (c2WTS) not starting after rebooting server - Microsoft Support | support.microsoft.com"
                                             [5]: https://web.archive.org/web/20231025233251/https://learn.microsoft.com/en-us/troubleshoot/windows-server/backup-and-storage/vss-error-8193-restart-cryptographic-services "VSS event 8193 when you restart the Cryptographic Services service after you install the DHCP role - Windows Server | Microsoft Learn | learn.microsoft.com"
                                         call:
-                                            -
-                                                function: DeleteFiles
-                                                parameters:
-                                                    fileGlob: '%SYSTEMROOT%\System32\catroot2\dberr.txt'
-                                            -
-                                                function: DeleteFiles
-                                                parameters:
-                                                    fileGlob: '%SYSTEMROOT%\System32\catroot2.log'
-                                            -
-                                                function: DeleteFiles
-                                                parameters:
-                                                    fileGlob: '%SYSTEMROOT%\System32\catroot2.jrs'
-                                            -
-                                                function: DeleteFiles
-                                                parameters:
-                                                    fileGlob: '%SYSTEMROOT%\System32\catroot2.edb'
-                                            -
-                                                function: DeleteFiles
-                                                parameters:
-                                                    fileGlob: '%SYSTEMROOT%\System32\catroot2.chk'
+                                            function: DeleteFiles
+                                            parameters:
+                                                fileGlob: '%SYSTEMROOT%\System32\catroot2\dberr.txt'
                                     -
                                         name: Clear Server-initiated Healing Events system logs
                                         docs: |-
@@ -2020,10 +1988,11 @@ actions:
                                     The `wuauserv` service, also known as "Windows Update Service" [7], uses this folder for its operations [1] [8] [9].
                                     This service manages the Windows Update Agent (WUA) functionality [7].
 
-                                    Clearing this directory is generally safe, and sometimes, Microsoft even recommends this action to troubleshoot and resolve update-related
-                                    errors [1] [5] [6] [9] [10].
-
-                                    This script contributes to users' privacy and system efficiency by cleaning up old and potentially unnecessary update files.
+                                    **Warning:** This is a Windows Update state reset, not just log cleanup.
+                                    It deletes downloaded update packages and the local update database, including displayed update history.
+                                    Downloads may need to be repeated. It does not uninstall already installed updates or recover deleted files on revert.
+                                    Do not use it during an update or as routine cleanup. Microsoft's reset procedure is intended for troubleshooting [1].
+                                    This script stops and restores `wuauserv`, but does not coordinate every update-related service or active installer.
 
                                     [1]: https://web.archive.org/web/20230902020255/https://learn.microsoft.com/en-us/troubleshoot/windows-client/deployment/additional-resources-for-windows-update#how-do-i-reset-windows-update-components "Additional resources for Windows Update - Windows Client | Microsoft Learn | learn.microsoft.com"
                                     [2]: https://web.archive.org/web/20231027190239/https://support.microsoft.com/en-us/topic/virus-scanning-recommendations-for-enterprise-computers-that-are-running-windows-or-windows-server-kb822158-c067a732-f24a-9079-d240-3733e39b40bc "Virus scanning recommendations for Enterprise computers that are running Windows or Windows Server (KB822158) - Microsoft Support | support.microsoft.com"
@@ -2151,7 +2120,7 @@ actions:
                             wevtutil sl Microsoft-Windows-LiveId/Operational /ca:O:BAG:SYD:(A;;0x1;;;SY)(A;;0x5;;;BA)(A;;0x1;;;LA)
                             for /f "tokens=*" %%i in ('wevtutil.exe el') DO (
                                 echo Deleting event log: "%%i"
-                                wevtutil.exe cl %1 "%%i"
+                                wevtutil.exe cl "%%i"
                             )
                     -
                         name: Clear Defender scan (protection) history
@@ -2718,7 +2687,16 @@ actions:
                             useStateFile: 'true'
             -
                 name: Clear previous Windows installations
-                call:   
+                docs: |-
+                    This script permanently removes files from `%SYSTEMDRIVE%\Windows.old`.
+                    Removing the previous installation can prevent using it to roll back Windows. Deleted files cannot be restored by this script.
+
+                    Cleanup reports the directory or file being processed rather than collecting the entire tree before starting deletion.
+                    It does not impose a time limit. Permission repair is attempted only for an access-denied item, once per path.
+                    Reparse points (including junctions and symbolic links) and paths that cannot be safely inspected are retained.
+                    Locked files, persistent access denials, or newly created files may leave directories behind; review the final counts and warnings.
+                    A stalled Windows filesystem or native operation can still block. The last reported phase and path help identify that operation.
+                call:
                     function: DeleteDirectory
                     parameters:
                         directoryGlob: '%SYSTEMDRIVE%\Windows.old'
@@ -2730,74 +2708,45 @@ actions:
                 name: Disable Recall
                 recommend: strict
                 docs: |-
-                    This script disables the Recall feature to address serious privacy concerns.
+                    This script prevents Windows from saving screen snapshots for Recall [1] [2].
 
-                    Recall is an AI feature introduced in Windows 11 on Copilot+ PCs [1] [2] [3] [4] [5].
-                    It is designed to capture and store snapshots of your screen and analyze them [1] [2] [3] [4] [5] [6] [7].
-                    This feature allows users to browse and search their past activities, such as images and text [1] [2] [3] [4] [5] [6] [7].
+                    Recall is available on eligible Windows 11 Copilot+ PCs and searches locally stored snapshots [1].
+                    Saving snapshots requires individual user opt-in; it is not enabled automatically [1] [2].
+                    On managed commercial devices, Recall is disabled and removed by default [1].
+                    Microsoft documents local processing, encrypted snapshot storage, Windows Hello authentication,
+                    and sensitive-information filtering enabled by default [1].
+                    Preventing snapshot storage can still reduce the amount of sensitive screen content retained on the device.
 
-                    Recall includes a component called 'screenray'.
-                    This component analyzes the snapshot's contents and lets you interact with elements within it [3] [5] [6].
-                    This script will also disable the screenray feature [6].
+                    This script sets `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsAI!DisableAIDataAnalysis` to `1` [2].
+                    Microsoft documents this policy for Windows 11 24H2 with KB5055627 (build 26100.3915) and later,
+                    on Pro, Enterprise, Education, and IoT Enterprise editions [2].
+                    Do not assume this registry policy is enforced on Windows Home or older builds.
+                    The script skips builds before 26100; this guard does not check the installed cumulative update or edition.
 
-                    This feature is enabled by default, so Windows will capture and store screen snapshots [2] [5] [6].
-                    They remain on your computer for months by default [4].
+                    **Warning:** Enabling this policy also deletes previously saved Recall snapshots [1] [2].
+                    Reverting removes the policy value; it does not recover deleted snapshots or opt the user into saving new ones.
+                    This script does not remove the Recall optional component or disable the separate Click to Do experience [1].
 
-                    Recall captures frequent screenshots, as frequent as multiple times during a minute [1] [2] [4].
-                    These screenshots may include all visible content such as app data, websites, images, and documents [2] [5].
-                    It may even include sensitive information like passwords and bank account numbers [2] [3].
-                    The data is indexed, and the indexes are stored locally on your computer [5].
-
-                    This feature raises significant security and privacy concerns.
-                    Experts sometimes describe this feature as a 'privacy nightmare' [4] [7] or 'keylogger' [4] due to these concerns.
-                    The privacy risks associated with this feature include:
-
-                    - **Misuse**:
-                      This data is stored locally on your computer [1] [2] [5] [7].
-                      It poses a risk of unauthorized access to your sensitive and private data [4] [7].
-                      Potential threats include malicious attackers, state actors, colleagues, or family members who could misuse this
-                      information for identity theft, financial crime, phishing, or coercion.
-                    - **Microsoft data collection**:
-                      Microsoft's data collection policies may change.
-                      As Mozilla expressed, this raises concerns about potential data sharing with law enforcement or the use of the data
-                      for targeted advertising or AI training in the future [7].
-                    - **Storing sensitive data**:
-                      Microsoft does not perform content moderation on the snapshots [2] [3] [4] [7].
-                      It means that sensitive information such as passwords or financial account numbers are visible and stored [2] [3],
-                      posing a significant privacy and security risk.
-                    - **Opt-in**:
-                      The feature is opt-in by default [2] [6], and users can only opt-out of certain sites if they are using Microsoft Edge [3].
-                      This limits user control over their privacy.
-                    - **Lack of transparency:**
-                      While Microsoft states that the snapshots are not sent to their servers [2] [7]
-                      and that all analysis is conducted locally [1] [2] [3] [7].
-                      However, Microsoft has not specified whether it collects the results of these analyses or any related diagnostic data.
-                      United Kingdom's data protection agency finds this lack of transparency worrying [4] [7].
-                    - **Language model vulnerabilities:**
-                      Language models susceptibility to attacks like prompt engineering underlines its security risks [8].
-                      More about security vulnerabilities: [Attacks on language models](https://erkinekici.com/articles/attacks-on-language-models/).
-
-                    This script configures the `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot!DisableAIDataAnalysis` registry key [6].
-
-                    By running this script, you enhance your privacy by preventing the storage and analysis of snapshots on your device [6],
-                    thereby mitigating the associated risks.
-
-                    [1]: https://web.archive.org/web/20240523143034/https://support.microsoft.com/en-us/windows/retrace-your-steps-with-recall-aa03f8a0-a78b-4b3e-b0a1-2eb8ac48701c "Retrace your steps with Recall - Microsoft Support | support.microsoft.com"
-                    [2]: https://web.archive.org/web/20240523143048/https://support.microsoft.com/en-us/windows/privacy-and-control-over-your-recall-experience-d404f672-7647-41e5-886c-a3c59680af15 "Privacy and control over your Recall experience - Microsoft Support | support.microsoft.com"
-                    [3]: https://web.archive.org/web/20240523143210/https://learn.microsoft.com/en-us/windows/client-management/manage-recall "Manage Recall for Windows clients - Windows Client Management | Microsoft Learn | learn.microsoft.com"
-                    [4]: https://web.archive.org/web/20240523122636/https://www.bleepingcomputer.com/news/microsoft/microsofts-new-windows-11-recall-is-a-privacy-nightmare/ "Microsoft's new Windows 11 Recall is a privacy nightmare | www.bleepingcomputer.com"
-                    [5]: https://web.archive.org/web/20240523143240/https://blogs.microsoft.com/blog/2024/05/20/introducing-copilot-pcs/ "Introducing Copilot+ PCs - The Official Microsoft Blog | blogs.microsoft.com"
-                    [6]: https://web.archive.org/web/20240522162728/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai#disableaidataanalysis "WindowsAI Policy CSP - Windows Client Management | Microsoft Learn | learn.microsoft.com"
-                    [7]: https://web.archive.org/web/20240523155006/https://www.bbc.com/news/articles/cpwwqp6nx14o "Microsoft Copilot+ Recall feature 'privacy nightmare' | www.bbc.com"
-                    [8]: https://erkinekici.com/articles/attacks-on-language-models/ "Attacks on language models :: Erkin Ekici | erkinekici.com"
+                    [1]: https://learn.microsoft.com/en-us/windows/client-management/manage-recall "Manage Recall for Windows clients | Microsoft Learn"
+                    [2]: https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai#disableaidataanalysis "WindowsAI Policy CSP: DisableAIDataAnalysis | Microsoft Learn"
                 call:
-                    function: SetRegistryValue
+                    function: RunPowerShellWithSetup
                     parameters:
-                        keyPath: HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot
-                        valueName: DisableAIDataAnalysis
-                        dataType: REG_DWORD
-                        data: "1"
-                        deleteOnRevert: 'true' # Missing by default since Windows 10 Pro (≥ 22H2) and Windows 11 Pro (≥ 23H2)
+                        setupCode: |-
+                            if ([Environment]::OSVersion.Version.Build -lt 26100) {
+                                Write-Output 'Skipping: Recall policy requires Windows 11 24H2 or later.'
+                                Exit 0
+                            }
+                        code: |-
+                            reg add 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsAI' `
+                                /v 'DisableAIDataAnalysis' `
+                                /t 'REG_DWORD' `
+                                /d '1' `
+                                /f
+                        revertCode: |-
+                            reg delete 'HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsAI' `
+                                /v 'DisableAIDataAnalysis' `
+                                /f 2>$null
             -
                 category: Disable app access to personal information
                 docs: |- # refactor-with-variables: Same • App Access Caution
@@ -9303,8 +9252,10 @@ actions:
                                         docs: |- # refactor-with-variables: • Chromium Policy Caution • "Disabling this telemetry.."
                                             This script disables the sending of diagnostic data in Edge.
 
-                                            This script blocks all diagnostic data related to your browser usage, including websites
-                                            visited, feature usage, and browser configuration [1] [2].
+                                            This script sets `DiagnosticData` to `0` (`Off`), disabling required and optional browser-usage
+                                            diagnostic data under that policy, including optional visited-website data [1] [2].
+                                            On Windows 10, this Edge policy requires Edge 122 or later; earlier versions use Windows diagnostic-data settings [1].
+                                            It is not a blanket blocker for every connection or connected service in the browser.
 
                                             Disabling this telemetry reduces potential privacy risks by preventing data sharing with third parties.
                                             This may also improve system performance by reducing processing workload.
@@ -9316,7 +9267,7 @@ actions:
                                             > - This will display the message "Your browser is managed by your organization" on the settings page.
                                             > - This locks settings and prevents them from being changed on the settings page.
 
-                                            [1]: https://web.archive.org/web/20240517212443/https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies#diagnosticdata "Microsoft Edge Browser Policy Documentation | Microsoft Learn | learn.microsoft.com"
+                                            [1]: https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/diagnosticdata "DiagnosticData | Microsoft Edge policy documentation"
                                             [2]: https://web.archive.org/web/20240624083056/https://admx.help/?Category=EdgeChromium&Policy=Microsoft.Policies.Edge::DiagnosticData "Send required and optional diagnostic data about browser usage | admx.help"
                                         call:
                                             -
@@ -9328,7 +9279,6 @@ actions:
                                                 function: ShowEdgeRestartSuggestion
                                     -
                                         name: Disable outdated Edge metrics data sending
-                                        recommend: standard
                                         docs: |- # refactor-with-variables: • Chromium Policy Caution • "Disabling this telemetry.."
                                             This script stops Edge from reporting metrics data.
 
@@ -9338,8 +9288,9 @@ actions:
                                             Disabling this telemetry potential privacy risks by preventing data sharing with third-parties.
                                             This may also improve system performance by reducing processing workload.
 
-                                            This script applies to Edge versions between 77 and 89 [1] [2].
-                                            It does not affect newer versions of Edge as this settings is deprecated [1] [2].
+                                            This legacy script applies only to Edge versions 77 through 88 [1].
+                                            It has no effect on Edge 89 or later and is not included in recommended selections.
+                                            Use the diagnostic-data policy on supported current versions instead [1].
 
                                             This script configures the `MetricsReportingEnabled` policy [1] [2].
                                             Changes will take effect after restarting the browser [1].
@@ -9348,19 +9299,18 @@ actions:
                                             > - This will display the message "Your browser is managed by your organization" on the settings page.
                                             > - This locks settings and prevents them from being changed on the settings page.
 
-                                            [1]: https://web.archive.org/web/20240517212443/https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies#metricsreportingenabled "Microsoft Edge Browser Policy Documentation | Microsoft Learn | learn.microsoft.com"
+                                            [1]: https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/metricsreportingenabled "MetricsReportingEnabled (obsolete) | Microsoft Edge policy documentation"
                                             [2]: https://web.archive.org/web/20240624083344/https://admx.help/?Category=EdgeChromium&Policy=Microsoft.Policies.Edge::MetricsReportingEnabled "Enable usage and crash-related data reporting (deprecated) | admx.help"
                                         call:
                                             -
                                                 function: SetEdgePolicyViaRegistry
                                                 parameters:
-                                                    valueName: MetricsReportingEnabled # Edge ≥ 77 and Edge ≤ 89
+                                                    valueName: MetricsReportingEnabled # Edge ≥ 77 and Edge ≤ 88
                                                     dwordData: '0'
                                             -
                                                 function: ShowEdgeRestartSuggestion
                                     -
                                         name: Disable outdated Edge site information sending
-                                        recommend: standard
                                         docs: |- # refactor-with-variables: • Chromium Policy Caution • "Disabling this telemetry.." 
                                             This script prevents Edge from sending site-related information.
 
@@ -9371,19 +9321,21 @@ actions:
                                             This may also improve system performance by reducing processing workload.
 
                                             This script configures the `SendSiteInfoToImproveServices` policy [1] [2].
+                                            It applies only to Edge versions 77 through 88 and has no effect on Edge 89 or later [1].
+                                            It is retained for legacy installations but is not included in recommended selections.
                                             Changes will take effect after restarting the browser [1].
 
                                             > **Caution**:
                                             > - This will display the message "Your browser is managed by your organization" on the settings page.
                                             > - This locks settings and prevents them from being changed on the settings page.
 
-                                            [1]: https://web.archive.org/web/20240314103512/https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies#sendsiteinfotoimproveservices "Microsoft Edge Browser Policy Documentation | Microsoft Learn | learn.microsoft.com"
+                                            [1]: https://learn.microsoft.com/en-us/deployedge/microsoft-edge-policies/sendsiteinfotoimproveservices "SendSiteInfoToImproveServices (obsolete) | Microsoft Edge policy documentation"
                                             [2]: https://web.archive.org/web/20240624083104/https://admx.help/?Category=EdgeChromium&Policy=Microsoft.Policies.Edge::SendSiteInfoToImproveServices "Send site information to improve Microsoft services (deprecated) | admx.help"
                                         call:
                                             -
                                                 function: SetEdgePolicyViaRegistry
                                                 parameters:
-                                                    valueName: SendSiteInfoToImproveServices # Edge ≥ 77 and Edge ≤ 89
+                                                    valueName: SendSiteInfoToImproveServices # Edge ≥ 77 and Edge ≤ 88
                                                     dwordData: '0'
                                             -
                                                 function: ShowEdgeRestartSuggestion
@@ -13258,7 +13210,9 @@ actions:
                                             linked with SMBv1 [1] [4] [13],
                                             and adjusting related settings to keep older systems stable [1] [4] [13].
                                             - Disabling server side processing of SMBv1 protocol using
-                                            `HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters!SMBv1` registry key [1] [14] [15].
+                                            `HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters!SMB1` registry value [4].
+                                            Revert uses configured defaults, not a saved prior state. It does not reinstall SMBv1 features
+                                            or add the obsolete `mrxsmb10` dependency back on modern Windows.
 
                                             These changes require a system reboot to take effect [1] [4] [9].
 
@@ -13308,7 +13262,7 @@ actions:
                                             [1]: https://web.archive.org/web/20240413122756/https://learn.microsoft.com/en-us/archive/blogs/secguide/disabling-smbv1-through-group-policy "Disabling SMBv1 through Group Policy | Microsoft Learn | learn.microsoft.com"
                                             [2]: https://web.archive.org/web/20240413124106/https://techcommunity.microsoft.com/t5/storage-at-microsoft/stop-using-smb1/ba-p/425858 "Stop using SMB1 - Microsoft Community Hub | techcommunity.microsoft.com"
                                             [3]: https://web.archive.org/web/20240413124245/https://www.stigviewer.com/stig/microsoft_windows_10/2023-09-29/finding/V-220729 "The Server Message Block (SMB) v1 protocol must be disabled on the system. | www.stigviewer.com"
-                                            [4]: https://web.archive.org/web/20240413122807/https://learn.microsoft.com/en-US/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3?tabs=server "Server | How to detect, enable and disable SMBv1, SMBv2, and SMBv3 in Windows | Microsoft Learn | learn.microsoft.com"
+                                            [4]: https://learn.microsoft.com/en-us/windows-server/storage/file-server/troubleshoot/detect-enable-and-disable-smbv1-v2-v3 "Detect, enable, and disable SMB protocols | Microsoft Learn"
                                             [5]: https://web.archive.org/web/20240413124050/https://www.cisa.gov/news-events/alerts/2017/01/16/smb-security-best-practices "SMB Security Best Practices | CISA | www.cisa.gov"
                                             [6]: https://web.archive.org/web/20240413122812/https://learn.microsoft.com/en-us/windows-server/storage/file-server/troubleshoot/smbv1-not-installed-by-default-in-windows "SMBv1 is not installed by default in Windows 10 version 1709, Windows Server version 1709 and later versions | Microsoft Learn | learn.microsoft.com"
                                             [7]: https://web.archive.org/web/20240413124101/https://learn.microsoft.com/en-us/archive/blogs/josebda/the-deprecation-of-smb1-you-should-be-planning-to-get-rid-of-this-old-smb-dialect "The Deprecation of SMB1 – You should be planning to get rid of this old SMB dialect | Microsoft Learn | learn.microsoft.com"
@@ -13353,7 +13307,7 @@ actions:
                                                 function: SetRegistryValue
                                                 parameters:
                                                     keyPath: HKLM\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters
-                                                    valueName: SMBv1
+                                                    valueName: SMB1
                                                     dataType: REG_DWORD
                                                     data: '0'
                                                     deleteOnRevert: 'true' # Missing value by default since Windows 10 Pro (≥ 22H1) and Windows 11 Pro (≥ 23H2)
@@ -15648,13 +15602,13 @@ actions:
                                             The feature is included in **Defender for Endpoint** suite [1].
 
                                             Automatically sending files to Microsoft's cloud [1] [3] raises significant privacy concerns.
-                                            This script improves your privacy by preventing automatic file uploads to Microsoft.
-                                            It may also improve system performance by reducing background network activity.
+                                            This script disables first-sight blocking, but does not change the separate cloud protection
+                                            or sample submission policies [1]. It does not guarantee that automatic file uploads stop.
 
                                             However, disabling this feature may reduce your device and network protection levels [1] [3].
                                             The Defense Information Systems Agency (DISA) recommends keeping this feature enabled for additional security [3].
 
-                                            > **Caution**: This change enhances privacy but may reduce overall system security.
+                                            > **Caution**: Disabling first-sight blocking reduces protection without disabling the separate sample submission policy.
 
                                             ### Technical Details
 
@@ -15666,10 +15620,14 @@ actions:
                                             - Setting the registry key `HKLM\Software\Policies\Microsoft\Windows Defender\SpyNet!DisableBlockAtFirstSeen`
                                               to configure the group policy [2] [3].
 
-                                            [1]: https://web.archive.org/web/20240728153741/https://learn.microsoft.com/en-us/defender-endpoint/configure-block-at-first-sight-microsoft-defender-antivirus?view=o365-worldwide "Enable block at first sight to detect malware in seconds - Microsoft Defender for Endpoint | Microsoft Learn"
+                                            Tamper Protection can cause changes to protected Defender settings to be ignored [5].
+                                            A successful registry write does not prove that Defender accepted the setting.
+
+                                            [1]: https://learn.microsoft.com/en-us/defender-endpoint/configure-block-at-first-sight-microsoft-defender-antivirus "Configure block at first sight | Microsoft Learn"
                                             [2]: https://web.archive.org/web/20240314124159/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-admx-microsoftdefenderantivirus#disableroutinelytakingaction "ADMX_MicrosoftDefenderAntivirus Policy CSP - Windows Client Management | Microsoft Learn | learn.microsoft.com"
                                             [3]: https://web.archive.org/web/20240728160331/https://www.stigviewer.com/stig/windows_defender_antivirus/2017-12-27/finding/V-75163 "Windows Defender AV must be configured to check in real time with MAPS before content is run or accessed. | www.stigviewer.com"
                                             [4]: https://web.archive.org/web/20240314124716/https://learn.microsoft.com/en-us/powershell/module/defender/set-mppreference?view=windowsserver2022-ps#-disableblockatfirstseen "Set-MpPreference (Defender) | Microsoft Learn | learn.microsoft.com"
+                                            [5]: https://learn.microsoft.com/en-us/defender-endpoint/cloud-protection-configure "Configure cloud protection and Tamper Protection limitations | Microsoft Learn"
                                         call:
                                             -
                                                 function: SetMpPreference
@@ -15710,14 +15668,15 @@ actions:
                                             Microsoft Active Protection Service [4].
                                             It sends your data, including personal information, to Microsoft [4].
 
-                                            Disabling this feature enhances privacy by limiting the amount of data sent to Microsoft's cloud for analysis.
-                                            may also improve system performance by reducing the waiting time for cloud-based file analysis.
+                                            Setting the extra timeout to zero retains the standard 10-second cloud check [5].
+                                            It does not disable cloud protection or automatic sample submission.
+                                            It can shorten the wait for a cloud verdict, but does not guarantee fewer uploads.
 
                                             However, this change comes with a security trade-off.
                                             Disabling the extended cloud check may reduce Defender's ability to detect and block new or complex malware
                                             requiring thorough cloud-based analysis.
 
-                                            > **Caution**: This change enhances privacy but may reduce overall system security.
+                                            > **Caution**: Shortening the analysis window can reduce protection. This is not an upload-blocking control.
 
                                             ### Technical Details
 
@@ -15733,21 +15692,22 @@ actions:
                                             [2]: https://web.archive.org/web/20240314122554/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#cloudextendedtimeout "Defender Policy CSP - Windows Client Management | Microsoft Learn | learn.microsoft.com"
                                             [3]: https://web.archive.org/web/20240314124716/https://learn.microsoft.com/en-us/powershell/module/defender/set-mppreference?view=windowsserver2022-ps#-cloudextendedtimeout "Set-MpPreference (Defender) | Microsoft Learn | learn.microsoft.com"
                                             [4]: https://web.archive.org/web/20240314122554/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#allowcloudprotection "Defender Policy CSP - Windows Client Management | Microsoft Learn | learn.microsoft.com"
+                                            [5]: https://learn.microsoft.com/en-us/defender-endpoint/configure-cloud-block-timeout-period-microsoft-defender-antivirus "Configure Microsoft Defender Antivirus cloud block time-out | Microsoft Learn"
                                         call:
                                             -
                                                 function: SetMpPreference
                                                 parameters:
                                                     property: CloudExtendedTimeout  # Status:   Get-MpPreference | Select-Object -Property CloudExtendedTimeout
-                                                    value: "'50'"                   # Set:      Set-MpPreference -Force -CloudExtendedTimeout '50'
-                                                    default: $False                 # Default:  0 | Set-MpPreference -Force -CloudExtendedTimeout '0'
-                                                    setDefaultOnWindows11: 'true'   # `Remove-MpPreference` sets it to 0 instead 1 (OS default) in Windows 11
+                                                    value: "'0'"
+                                                    default: "'0'"
+                                                    setDefaultOnWindows11: 'true'
                                             -
                                                 function: SetRegistryValue
                                                 parameters:
                                                     keyPath: HKLM\Software\Policies\Microsoft\Windows Defender\MpEngine
                                                     valueName: MpBafsExtendedTimeout
                                                     dataType: REG_DWORD
-                                                    data: "50"
+                                                    data: "0"
                                                     deleteOnRevert: 'true' # Missing by default since Windows 10 Pro (≥ 22H2) and Windows 11 Pro (≥ 23H2)
                                             -
                                                 function: SetRegistryValue
@@ -15755,7 +15715,7 @@ actions:
                                                     keyPath: HKLM\SOFTWARE\Microsoft\Windows Defender\MpEngine
                                                     valueName: MpBafsExtendedTimeout
                                                     dataType: REG_DWORD
-                                                    data: "50"
+                                                    data: "0"
                                                     deleteOnRevert: 'true' # Missing by default since Windows 10 Pro (≥ 22H2) and Windows 11 Pro (≥ 23H2)
                                     -
                                         name: Disable Defender Antivirus aggressive cloud protection
@@ -15770,16 +15730,21 @@ actions:
                                             and **Microsoft Defender for Endpoint** [4].
 
                                             By default, the protection level is unconfigured [1] [3] [4].
-                                            This default state provides the least protection [4].
-                                            This script explicitly configures the setting to ensure aggressive options are disabled.
+                                            The default blocking level still provides malware detection [4].
+                                            This script sets the blocking level to `0` consistently in the preference and registry settings.
+                                            It does not disable cloud protection or automatic sample submission [4].
 
                                             Disabling this feature:
 
-                                            - Enhances privacy by limiting *cloud protection*, which sends personal data to Microsoft [5].
                                             - Increases user control over what runs on their device [4].
-                                            - May improve system performance by optimizing scan performance [4].
+                                            - Reduces aggressive blocking that can produce false positives [4].
 
-                                            > **Caution**: This change enhances privacy but may reduce overall system security.
+                                            > **Caution**: Reducing the blocking level can reduce protection. It is not a control for preventing cloud uploads.
+
+                                            Policy defaults, observed device preferences, and centrally managed settings are not interchangeable.
+                                            Revert does not restore a captured prior value: the helper uses its configured fallback on Windows 10
+                                            and attempts preference removal on Windows 11. Actual defaults and enforcement can differ.
+                                            Tamper Protection can cause changes to protected settings to be ignored [4].
 
                                             ### Technical Details
 
@@ -15794,7 +15759,7 @@ actions:
                                             [1]: https://web.archive.org/web/20240728172058/https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsDefender::MpEngine_MpCloudBlockLevel "Select cloud protection level | admx.help"
                                             [2]: https://web.archive.org/web/20240314124716/https://learn.microsoft.com/en-us/powershell/module/defender/set-mppreference?view=windowsserver2022-ps#-cloudblocklevel "Set-MpPreference (Defender) | Microsoft Learn | learn.microsoft.com"
                                             [3]: https://web.archive.org/web/20240314122554/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#cloudblocklevel "Defender Policy CSP - Windows Client Management | Microsoft Learn | learn.microsoft.com"
-                                            [4]: https://web.archive.org/web/20240728172042/https://learn.microsoft.com/en-us/defender-endpoint/specify-cloud-protection-level-microsoft-defender-antivirus "Specify the cloud protection level for Microsoft Defender Antivirus - Microsoft Defender for Endpoint | Microsoft Learn | learn.microsoft.com"
+                                            [4]: https://learn.microsoft.com/en-us/defender-endpoint/cloud-protection-configure "Configure cloud protection in Microsoft Defender Antivirus | Microsoft Learn"
                                             [5]: https://web.archive.org/web/20240314122554/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-defender#allowcloudprotection "Defender Policy CSP - Windows Client Management | Microsoft Learn | learn.microsoft.com"
                                         call:
                                             -
@@ -15817,7 +15782,7 @@ actions:
                                                     keyPath: HKLM\SOFTWARE\Microsoft\Windows Defender\MpEngine
                                                     valueName: MpCloudBlockLevel
                                                     dataType: REG_DWORD
-                                                    data: "2"
+                                                    data: "0"
                                                     deleteOnRevert: 'true' # Missing by default since Windows 10 Pro (≥ 22H2) and Windows 11 Pro (≥ 23H2)
                                     -
                                         name: Disable Defender Antivirus cloud-based notifications
@@ -16916,13 +16881,7 @@ actions:
                                     and `E5 transition` [12].
                                     However, these values lack official public documentation [13].
 
-                                    To check the current **Tamper Protection** source, use this command:
-
-                                    ```batchfile
-                                    wmic /namespace:\\root\microsoft\windows\defender path MSFT_MpComputerStatus get /format:list | findstr "TamperProtectionSource"
-                                    ````
-
-                                    Or this PowerShell command:
+                                    To check the current **Tamper Protection** source, use this PowerShell command:
 
                                     ```ps1
                                     Get-MpComputerStatus | Select-Object -ExpandProperty TamperProtectionSource
@@ -28383,7 +28342,7 @@ actions:
 
                             [1]: https://web.archive.org/web/20241202085516/https://support.microsoft.com/en-us/windows/windows-update-faq-8a903416-6f45-0718-f5c7-375e92dddeb2 "Windows Update: FAQ - Microsoft Support | support.microsoft.com"
                             [2]: https://web.archive.org/web/20241202090433/https://learn.microsoft.com/en-us/troubleshoot/windows-client/installing-updates-features-roles/keep-windows-up-to-date#automatic-updates-feature "How to keep Windows up to date - Windows Client | Microsoft Learn | learn.microsoft.com"
-                            [3]: https://web.archive.org/web/20230711172555/https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry "Manage additional Windows Update settings - Windows Deployment | Microsoft Learn"
+                            [3]: https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry "Manage additional Windows Update settings | Microsoft Learn"
                             [4]: https://web.archive.org/web/20230807165936/https://learn.microsoft.com/de-de/security-updates/windowsupdateservices/18127499 "Configure Automatic Updates in a Non–Active Directory Environment | Microsoft Learn"
                             [5]: https://web.archive.org/web/20221001051250/https://support.microsoft.com/en-us/topic/incorrect-automatic-updates-notification-is-received-even-though-au-options-are-disabled-in-windows-8-1-and-windows-server-2012-r2-18b4b73a-3910-9408-809c-7eaad0e1fbc7 "Incorrect Automatic Updates notification is received even though AU options are disabled in Windows 8.1 and Windows Server 2012 R2 - Microsoft Support"
                         call:
@@ -28398,7 +28357,8 @@ actions:
                         name: Disable automatic installation of Windows updates without user consent
                         docs: |-
                             This script changes how your Windows computer handles automatic updates by modifying the `AUOptions` registry key.
-                            After running this script, your computer will notify you before downloading any updates [1] [2] [3].
+                            This requests notification before download and installation through Automatic Updates [1] [2] [3].
+                            It is not a universal blocker for every application or security-product update.
 
                             In the default setup, your Windows system is configured to download and install updates automatically without notifying you [4].
                             This means that new updates could be installed on your system without your explicit approval.
@@ -28412,11 +28372,12 @@ actions:
                             On older versions of Windows, setting this key to `1` would prevent the system from even checking for updates [5].
                             However, starting from Windows 10, the key `1` has a different meaning [2][3].
 
-                            Running this script doesn't disable updates; it just ensures that you are informed and have the final say on
-                            whether to download them or not.
+                            This script does not disable Windows Update. Centrally managed policies and other update settings
+                            can affect the effective behavior. Delaying security updates can leave known vulnerabilities unpatched.
+                            Revert writes the configured `AUOptions = 4` fallback; it does not restore a captured previous configuration.
 
                             [1]: https://web.archive.org/web/20230807165936/https://learn.microsoft.com/de-de/security-updates/windowsupdateservices/18127499 "Configure Automatic Updates in a Non–Active Directory Environment | Microsoft Learn"
-                            [2]: https://web.archive.org/web/20230711172555/https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry "Manage additional Windows Update settings - Windows Deployment | Microsoft Learn"
+                            [2]: https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry "Manage additional Windows Update settings | Microsoft Learn"
                             [3]: https://web.archive.org/web/20230815051303/https://learn.microsoft.com/en-us/windows/deployment/update/waas-restart#registry-keys-used-to-manage-restart "Manage device restarts after updates - Windows Deployment | Microsoft Learn"
                             [4]: https://web.archive.org/web/20230826081345/https://learn.microsoft.com/en-US/troubleshoot/windows-client/deployment/update-windows-update-agent "Update Windows Update Agent to latest version - Windows Client | Microsoft Learn"
                             [5]: https://web.archive.org/web/20221001051250/https://support.microsoft.com/en-us/topic/incorrect-automatic-updates-notification-is-received-even-though-au-options-are-disabled-in-windows-8-1-and-windows-server-2012-r2-18b4b73a-3910-9408-809c-7eaad0e1fbc7 "Incorrect Automatic Updates notification is received even though AU options are disabled in Windows 8.1 and Windows Server 2012 R2 - Microsoft Support"
@@ -28431,19 +28392,19 @@ actions:
                     -
                         name: Disable automatic daily installation of Windows updates
                         docs: |-
-                            This script stops Windows from automatically installing updates every day. By doing so, you gain control over when update
-                            happen on your computer [1] [2].
+                            Despite its historical name, this script only removes the configured update installation day.
+                            **It does not disable daily updates or Automatic Updates.**
 
-                            By default, Windows is set to automatically update every day [2]. Having control over the update timing allows you to review
-                            what is being changed, thereby protecting your privacy and enhancing your system's security.
+                            It deletes `ScheduledInstallDay` under `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU`.
+                            A configured value of `0` means every day; values `1` through `7` select a day of the week [1].
+                            These schedule settings are used with scheduled automatic installation, such as `AUOptions = 4` [1].
+                            Removing the value removes that policy setting rather than disabling the update mechanism.
+                            Other policies and local preferences can still schedule or install updates [1].
 
-                            Technically, what the script does is remove a specific setting in the computer's system registry, the `ScheduledInstallDay` key
-                            from `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU` [1] [2].
+                            The existing script identifier is retained for compatibility.
+                            Revert also leaves this value unconfigured; it does not restore a previously configured day.
 
-                            Disabling the scheduled install day ensures that updates won't be forcibly applied on a specific day of the week.
-
-                            [1]: https://web.archive.org/web/20230711172555/https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry "Manage additional Windows Update settings - Windows Deployment | Microsoft Learn"
-                            [2]: https://web.archive.org/web/20230708165017/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-update#scheduledinstallday "Update Policy CSP - Windows Client Management | Microsoft Learn"
+                            [1]: https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry "Manage additional Windows Update settings | Microsoft Learn"
                         call:
                             function: DeleteRegistryValue
                             parameters:
@@ -28457,21 +28418,18 @@ actions:
                     -
                         name: Disable scheduled automatic updates
                         docs: |-
-                            This script turns off the automatic installation of Windows updates that are set to occur at a specific time.
-                            By doing this, you take back control over when your computer updates itself [1] [2] [3].
-                            The default behavior is to install updates at 3 AM [3].
+                            Despite its historical name, this script only removes the configured update installation time.
+                            **It does not disable scheduled updates or Automatic Updates.**
 
-                            Windows updates can be important for system security, but automatic installation could occur at inconvenient times and may even
-                            restart your computer without prior warning. This could interrupt your tasks and may send data about your system to external servers.
-                            By disabling the automatic scheduled installation time, you can manually control when updates are installed [3], ensuring that you're
-                            aware of any changes to your system.
+                            It deletes `ScheduledInstallTime` under `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU`.
+                            This value selects an installation hour from `0` through `23` for scheduled automatic installation [1].
+                            Removing it removes that policy setting. Other policies, defaults, and local preferences still apply [1].
+                            Do not rely on this script to prevent updates or restarts.
 
-                            The script works by removing a specific registry key called `ScheduledInstallTime` under
-                            `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU` [2] [3]. This is the system setting that controls the scheduled update time.
+                            The existing script identifier is retained for compatibility.
+                            Revert also leaves the time unconfigured; it does not restore a previously configured hour.
 
-                            [1]: https://web.archive.org/web/20230813094618/https://learn.microsoft.com/fr-fr/security-updates/windowsupdateservices/18127152 "Configure Automatic Updates in a Non–Active Directory Environment | Microsoft Learn"
-                            [2]: https://web.archive.org/web/20230711172555/https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry "Manage additional Windows Update settings - Windows Deployment | Microsoft Learn"
-                            [3]: https://web.archive.org/web/20230708165017/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-update#scheduledinstalltime "Update Policy CSP - Windows Client Management | Microsoft Learn"
+                            [1]: https://learn.microsoft.com/en-us/windows/deployment/update/waas-wu-settings#configuring-automatic-updates-by-editing-the-registry "Manage additional Windows Update settings | Microsoft Learn"
                         call:
                             function: DeleteRegistryValue
                             parameters:
@@ -35729,18 +35687,21 @@ actions:
                                 #   This step is designed to prevent unintended data loss during script execution.
                                 duringIteration: |-
                                     try {
-                                        if (Test-Path -Path $path -PathType Leaf) {
-                                            Write-Warning "Retaining file `"$path`" to safeguard your data."
-                                            continue;
-                                        } elseif (Test-Path -Path $path -PathType Container) {
-                                            if ((Get-ChildItem "$path" -Recurse | Measure-Object).Count -gt 0) {
-                                                Write-Warning "Preserving non-empty folder `"$path`" to protect your files."
+                                            if (Test-Path -LiteralPath $path -PathType Leaf) {
+                                                Write-Warning "Retaining file `"$path`" to safeguard your data."
+                                                $skippedCount++
                                                 continue;
+                                            } elseif (Test-Path -LiteralPath $path -PathType Container) {
+                                                if (@(Get-ChildItem -LiteralPath $path -Force -ErrorAction Stop | Select-Object -First 1).Count -gt 0) {
+                                                    Write-Warning "Preserving non-empty folder `"$path`" to protect your files."
+                                                    $skippedCount++
+                                                    continue;
+                                                }
                                             }
-                                        }
-                                    } catch {
-                                        Write-Warning "An error occurred while processing `"$path`". Skipping to protect your data. Error: $($_.Exception.Message)"
-                                        continue;
+                                        } catch {
+                                            Write-Warning "An error occurred while processing `"$path`". Skipping to protect your data. Error: $($_.Exception.Message)"
+                                            $skippedCount++
+                                            continue;
                                     }
                     -
                         name: Remove OneDrive installation files and cache
@@ -35911,12 +35872,7 @@ actions:
                                 #   Windows 10 Pro (≥ 20H2) : 🔴 Missing
                                 #   Windows 11 Pro (≥ 23H2) : 🔴 Missing
                                 evaluateDataAsPowerShell: 'true'
-                                dataOnRevert: > # Multilines are not supported
-                                    if ([Environment]::Is64BitOperatingSystem) {
-                                        "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe /silent"
-                                    } else {
-                                        "$env:SYSTEMROOT\System32\OneDriveSetup.exe /silent"
-                                    }
+                                dataOnRevert: 'if ([Environment]::Is64BitOperatingSystem) { "$env:SYSTEMROOT\SysWOW64\OneDriveSetup.exe /silent" } else { "$env:SYSTEMROOT\System32\OneDriveSetup.exe /silent" }'
                                 dataTypeOnRevert: REG_SZ
                                 minimumWindowsVersion: Windows10-1909
                                 maximumWindowsVersion: Windows10-1909
@@ -35972,7 +35928,7 @@ actions:
 
                             The SID, denoted by 'xxxxxx', varies per installation and represents the user account associated with the task.
                             SID of user accounts always start with `S-1-5-21` [4], the rest of the number changes per user.
-                            To see all user SIDs, you can run `wmic useraccount get Name,sid`.
+                            To list user accounts and SIDs through PowerShell, run `Get-CimInstance Win32_UserAccount | Select-Object Name, SID`.
                             The SID for your account can be confirmed using `whoami /user`.
                             A SID which doesn't correspond to any user account may appear.
                             This is be due to system preparation processes (`sysprep`) that use different SIDs for tasks to prevent duplication [5].
@@ -38368,61 +38324,33 @@ actions:
             -
                 category: Remove Windows Copilot
                 docs: |-
-                    This category includes scripts to disable or remove the Windows Copilot feature.
-                    "Windows Copilot" is also known as "Copilot in Windows" [1] [2] [3],
+                    These scripts target the **legacy Copilot in Windows** experience, not the current Microsoft Copilot app.
+                    Microsoft replaced the legacy experience and recommends AppLocker rather than the legacy
+                    `TurnOffWindowsCopilot` policy to block the consumer app [1].
+                    The scripts remain available for older installations but are not included in recommended selections.
+                    They do not uninstall the current Copilot app or block Copilot in Microsoft 365, Edge, or on the web.
 
-                    Windows Copilot is an AI assistant within Windows [1] [2].
-                    It helps with a wide range of tasks, like adjusting system settings [1] [2].
-                    It can deliver web results [1], and supports generating creative content, like images [1] [2],
-                    and providing personalized suggestions based on user data analysis [2].
+                    For the current consumer app, Microsoft documents uninstalling `Microsoft.Copilot` through
+                    Settings or PowerShell, and using a targeted AppLocker policy to prevent installation or launch [1].
+                    Review those controls separately; these legacy registry settings are not substitutes for them.
 
-                    While these features enhance user experience, they raise privacy concerns due to the extensive personal
-                    data access and processing involved, including user files [4], keyboard and voice inputs [3], and browser
-                    history [3].
-                    Such data is transmitted to Microsoft's servers [3].
-                    Transmitting this data to Microsoft poses potential privacy and security risks.
-
-                    Moreover, Copilot's susceptibility to attacks like prompt engineering underlines its security risks [5].
-                    More about security vulnerabilities: [Attacks on language models](https://erkinekici.com/articles/attacks-on-language-models/).
-
-                    Removing Windows Copilot reduces privacy and security risks, improves system performance, and simplifies
-                    the user interface.
-
-                    [1]: https://web.archive.org/web/20240122063553/https://www.microsoft.com/en-us/windows/copilot-ai-features "Copilot in Windows & Other AI-Powered Features | Microsoft | www.microsoft.com"
-                    [2]: https://web.archive.org/web/20240122063357/https://support.microsoft.com/en-us/windows/welcome-to-copilot-in-windows-675708af-8c16-4675-afeb-85a5a476ccb0 "Welcome to Copilot in Windows - Microsoft Support | support.microsoft.com"
-                    [3]: https://web.archive.org/web/20240122063412/https://support.microsoft.com/en-us/windows/copilot-in-windows-your-data-and-privacy-3e265e82-fc76-4d0a-afc0-4a0de528b73a "Copilot in Windows: Your data and privacy - Microsoft Support | support.microsoft.com"
-                    [4]: https://web.archive.org/web/20240122063447/https://concentric.ai/too-much-access-microsoft-copilot-data-risks-explained/ "2023 Microsoft Copilot Data Risks Explained | Concentric AI | concentric.ai"
-                    [5]: https://erkinekici.com/articles/attacks-on-language-models/ "Attacks on language models :: Erkin Ekici | erkinekici.com"
+                    [1]: https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot "Updated Windows and Microsoft Copilot Chat experience | Microsoft Learn"
                 children:
                     -
                         name: Disable Copilot feature
-                        recommend: strict
                         docs: |-
-                            This script deactivates the Windows Copilot feature, enhancing user privacy and potentially improving system performance.
-                            By default, Copilot is enabled and appears on the taskbar when available [1] [2].
+                            This script configures the **legacy Copilot in Windows** policy.
+                            It writes `TurnOffWindowsCopilot` under `SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot`
+                            in both `HKLM` and `HKCU`, preserving the older machine and current-user settings [1] [2].
 
-                            Disabling Windows Copilot prevents it from appearing on the taskbar and stops it from functioning [1] [2].
-                            This action is useful for users who prioritize privacy and system performance, as it eliminates a potential
-                            channel for data sharing with Microsoft servers and reduces the attacks on language models [3]. 
-                            Read more: [Attacks on language models](https://erkinekici.com/articles/attacks-on-language-models/).
+                            Microsoft now directs administrators to AppLocker for the current Microsoft Copilot app,
+                            instead of this legacy policy [3].
+                            This script does not remove that app or prevent access to Microsoft 365, Edge, or web Copilot.
+                            Use it only for older installations that still implement the legacy experience.
 
-                            The script operates by modifying two registry keys:
-
-                            - `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot!TurnOffWindowsCopilot`:
-                              This key disables Copilot for all users on the device [2] [4].
-                            - `HKCU\SOFTWARE\Policies\Microsoft\Windows\WindowsCopilot!TurnOffWindowsCopilot`:
-                              This key disables Copilot for the current user [1] [4].
-
-                            To fully disable Copilot, both machine-level (`HKLM`) and user-level (`HKCU`) settings might need
-                            adjustment, given reports that `HKLM` alone is inadequate [4].
-
-                            This script turns off Copilot, enhancing privacy by preventing data collection and transmission,
-                            and improving security by reducing the risk of language model attacks [3].
-
-                            [1]: https://web.archive.org/web/20240122064120/https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot "Manage Copilot in Windows - Windows Client Management | Microsoft Learn | learn.microsoft.com"
-                            [2]: https://web.archive.org/web/20240522162728/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsai#turnoffwindowscopilot "WindowsAI Policy CSP - Windows Client Management | Microsoft Learn | learn.microsoft.com"
-                            [3]: https://erkinekici.com/articles/attacks-on-language-models/ "Attacks on language models :: Erkin Ekici | erkinekici.com"
-                            [4]: https://web.archive.org/web/20240122064046/https://www.elevenforum.com/t/enable-or-disable-windows-copilot-in-windows-11.17045/ "Enable or Disable Windows Copilot in Windows 11 Tutorial | Windows 11 Forum | www.elevenforum.com"
+                            [1]: https://web.archive.org/web/20240122064120/https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot "Legacy Copilot management documentation | Microsoft Learn"
+                            [2]: https://web.archive.org/web/20240122064046/https://www.elevenforum.com/t/enable-or-disable-windows-copilot-in-windows-11.17045/ "Legacy Windows Copilot settings | Windows 11 Forum"
+                            [3]: https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot "Updated Windows and Microsoft Copilot Chat experience | Microsoft Learn"
                         call:
                             -
                                 function: SetRegistryValue
@@ -38442,20 +38370,13 @@ actions:
                                     deleteOnRevert: 'true' # Missing by default since Windows 10 Pro (≥ 22H2) and Windows 11 Pro (≥ 23H2)
                     -
                         name: Disable Copilot access
-                        recommend: strict
                         docs: |-
-                            This script disables Copilot access on your computer, enhancing your privacy.
-
-                            It prevents the Copilot feature from activating or being suggested for use locally [1] [2].
-
-                            When activated, Copilot can access and process a vast array of personal data, potentially leading to privacy concerns.
-                            By setting your local user's eligibility status to "ineligible" this script effectively removes the possibility of Copilot
-                            being automatically offered or activated on your system.
-
-                            It works by adjusting the `HKCU\Software\Microsoft\Windows\Shell\Copilot\BingChat!IsUserEligible` registry key [1] [2] [3].
-                            Typically, this key may be modified by Microsoft based on your account activity [3].
-                            However, running this script will override such adjustments, maintaining your privacy preference and potentially
-                            enhancing system performance by disabling background services.
+                            This script changes an **undocumented legacy Copilot eligibility setting**, reported on older
+                            Windows 10 and Windows 11 builds [1] [2] [3].
+                            It sets `HKCU\Software\Microsoft\Windows\Shell\Copilot\BingChat!IsUserEligible` to `0`.
+                            Windows may update this value again; it is not a supported enforcement policy.
+                            Its effect on current Windows builds is unverified, and it does not control the current Microsoft Copilot app [4].
+                            It is retained for legacy use only and is not recommended.
 
                             Please restart your computer after applying this script to activate changes [2] [3].
                             If reverting, relog into your Microsoft account to reset settings [3].
@@ -38463,6 +38384,7 @@ actions:
                             [1]: https://web.archive.org/web/20240122065339/https://itstechbased.com/how-to-enable-new-copilot-ai-in-windows-11-22631-2262-beta/ "How to Enable New Copilot AI in Windows 11 22631.2262 (Beta) - Tech Based | itstechbased.com"
                             [2]: https://web.archive.org/web/20240122065302/https://betawiki.net/wiki/Windows_10_build_19045.3754 "Windows 10 build 19045.3754 - BetaWiki | betawiki.net"
                             [3]: https://web.archive.org/web/20240122065316/https://www.neowin.net/guides/how-to-enable-copilot-in-windows-10/ "How to enable Copilot in Windows 10 - Neowin | www.neowin.net"
+                            [4]: https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot "Updated Windows and Microsoft Copilot Chat experience | Microsoft Learn"
                         call:
                             -
                                 function: SetRegistryValue
@@ -38476,10 +38398,8 @@ actions:
                                 function: ShowComputerRestartSuggestion
                     -
                         name: Disable Copilot auto-launch on start
-                        recommend: strict
                         docs: |-
-                            This script stops the Copilot feature from automatically starting up with Windows,
-                            providing a more controlled and resource-efficient computing experience.
+                            This script targets **legacy Copilot sidebar auto-launch**, not startup behavior of the current Copilot app.
 
                             With the release of Windows 11 builds 25992 (Canary) and 23615 (Dev), users encountered a new functionality
                             that would auto-launch Copilot on wider screens [1] [2] [3].
@@ -38487,13 +38407,13 @@ actions:
                             This script modifies the `HKCU\Software\Microsoft\Windows\CurrentVersion\Notifications\Settings!AutoOpenCopilotLargeScreens`
                             registry key to configure this setting [1] [2].
 
-                            This script ensures Copilot stays inactive at startup, activating only when the user initiates it manually.
-                            This change not only respects user preference but also frees up system resources that would otherwise be consumed by this feature,
-                            potentially leading to faster startup times and better overall performance.
+                            The sidebar experience has been replaced [4].
+                            This setting's effect on current builds is unverified, so it is no longer recommended.
 
                             [1]: https://web.archive.org/web/20240122071219/https://www.elevenforum.com/t/enable-or-disable-open-copilot-at-startup-in-windows-11.19626/ "Enable or Disable Open Copilot at Startup in Windows 11 Tutorial | Windows 11 Forum | www.elevenforum.com"
                             [2]: https://web.archive.org/web/20240122071337/https://blogs.windows.com/windows-insider/2024/01/11/announcing-windows-11-insider-preview-build-23615-dev-channel/ "Announcing Windows 11 Insider Preview Build 23615 (Dev Channel) | Windows Insider Blog | blogs.windows.com"
                             [3]: https://web.archive.org/web/20240122071352/https://geekrewind.com/how-to-turn-open-copilot-when-windows-starts-on-or-off-in-windows-11/ "How to Turn “Open Copilot when Windows Starts” On or Off in Windows 11 - Geek Rewind | geekrewind.com"
+                            [4]: https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot "Updated Windows and Microsoft Copilot Chat experience | Microsoft Learn"
                         call:
                             function: SetRegistryValue
                             parameters:
@@ -38504,9 +38424,9 @@ actions:
                                 deleteOnRevert: 'true' # This key does not exist (tested since Windows 10 22H2, and Windows 11 23H2)
                     -
                         name: Remove "Copilot" icon from taskbar
-                        recommend: strict
                         docs: |-
-                            This script removes the Copilot icon from the taskbar.
+                            This script hides the **legacy Copilot taskbar button**, not a pinned shortcut for the current Copilot app.
+                            Microsoft has replaced the sidebar experience [5]; this legacy setting is no longer recommended for current builds.
                             Windows added a taskbar button enabled by default to launch Windows Copilot [1].
                             This feature was introduced with the Windows 11 22H2 Moments 4 update [2] [3].
 
@@ -38525,6 +38445,7 @@ actions:
                             [2]: https://web.archive.org/web/20240122072448/https://support.microsoft.com/en-us/topic/october-31-2023-kb5031455-os-builds-22621-2506-and-22631-2506-preview-6513c5ec-c5a2-4aaf-97f5-44c13d29e0d4 "October 31, 2023—KB5031455 (OS Builds 22621.2506 and 22631.2506) Preview - Microsoft Support | support.microsoft.com"
                             [3]: https://web.archive.org/web/20240122071203/https://www.elevenforum.com/t/add-or-remove-copilot-button-on-taskbar-in-windows-11.16015/ "Add or Remove Copilot Button on Taskbar in Windows 11 Tutorial | Windows 11 Forum | www.elevenforum.com"
                             [4]: https://web.archive.org/web/20240122071007/https://www.thewindowsclub.com/how-to-show-or-hide-copilot-button-on-taskbar-in-windows "How to remove Copilot from Taskbar in Windows 11 | www.thewindowsclub.com"
+                            [5]: https://learn.microsoft.com/en-us/windows/client-management/manage-windows-copilot "Updated Windows and Microsoft Copilot Chat experience | Microsoft Learn"
                         call:
                             -
                                 function: SetRegistryValue
@@ -40699,8 +40620,8 @@ functions:
                             Remove-Item $streamFile, $scriptFile
                         }
                     }
-                    {{ end }}{{ with $setupCode }}
-                        {{ . {{ with $elevateToTrustedInstaller }} | inlinePowershell {{ end }} }}
+                    {{ end }}{{ with $setupCodeUnelevated }}
+                        {{ . }}
                     {{ end }}
                 code: |-
                     {{ with $elevateToTrustedInstaller }}
@@ -40927,7 +40848,6 @@ functions:
                         exit 0
                     }
                     try {
-                        Invoke-Expression "$($command.Name) -Force -$propertyName `$value -ErrorAction Stop"
                         Set-MpPreference -Force -{{ $property }} $value -ErrorAction Stop
                         Write-Host "Successfully set `"$propertyName`" to `"$value`"."
                         exit 0
@@ -41524,7 +41444,8 @@ functions:
         name: DeleteGlob
         # ℹ️ Behavior:
         #   Deletes files and directories based on a Unix-style glob pattern.
-        #   Optionally, it can grant full permissions to the items before deletion.
+        #   Traverses immediate children in postorder without a whole-tree prescan.
+        #   Optional permission repair is nonrecursive and attempted once per denied path.
         # 💡 Usage:
         #   This is a low-level function. Favor higher-level functions like `ClearDirectoryContents`, `DeleteDirectory`, and `DeleteFiles`
         #   for clearer intent and enhanced security when applicable.
@@ -41534,7 +41455,7 @@ functions:
         #   applications.
         parameters:
             - name: pathGlob            # Glob pattern for search.
-            - name: grantPermissions    # Grants permission on items of the parent directory recursively (including all files and directories) to be able to delete them.
+            - name: grantPermissions    # Allows one nonrecursive permission repair per denied item; does not reset ACLs or repair unrelated ancestors.
               optional: true
             - name: beforeIteration     # (Iteration callback) Code to run before iteration.
               optional: true
@@ -41545,116 +41466,138 @@ functions:
             - name: recurse             # If set, deletes all files and directories recursively.
               optional: true
         call:
-            function: IterateGlob
+            function: RunPowerShell
             parameters:
-                pathGlob: '{{ $pathGlob }}'
-                recurse: '{{ with $recurse }}{{ . }}{{ end }}'
-                # Marked: refactor-with-variables (optionally)
-                #   Granting permissions has limitations for wildcard due to `takeown` and `icacls`. These commands are used for their simplicity to avoid adjusting token privileges.
-                #   However, adjusting token privileges is already implemented by `SoftFileDelete`, when this kind of implementations are reusable, this script can be improved to
-                #   use `Get-Acl`, `Set-Acl` instead for better wildcards support. When using `Get-Acl`, `Set-Acl`, think also about a way to handle when the user is lacking "List Folder"
-                # Considerations for using `Get-Acl` and `Set-Acl`:
-                #   These commands may encounter issues when the user lacks "List Folder" permissions on a parent directory, which is essential for the `DeleteGlob` function.
-                #   This is robustly handled by `takeown`.
-                #     `takeown` effectively handles scenarios where the user lacks "List Folder" permissions.
-                #     It requires a localized 'yes' flag, which varies with the system language ('y' for English).
-                #     To find the localized 'yes', the script uses the `choice` command. This approach is simpler and more reliable
-                #     than parsing `takeown /?`, which has proven to be inconsistent across different languages.
-                #   For future enhancements:
-                #       - Explore handling folder listing permission issues when transitioning to `Get-Acl` and `Set-Acl`.
-                #       - Currently, `takeown` is preferred for its reliability in permission handling, especially in wildcard scenarios.
-                beforeIteration: |-
+                code: |-
+                    $pathGlobPattern = "{{ $pathGlob }}"
+                    $expandedPath = [Environment]::ExpandEnvironmentVariables($pathGlobPattern)
+                    $recurse = {{ with $recurse }} $true # {{ end }} $false
+                    $deletedCount = 0
+                    $failedCount = 0
+                    $absentCount = 0
+                    $linkCount = 0
+                    $skippedCount = 0
+                    $scheduled = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+                    $pending = [Collections.Generic.Stack[object]]::new()
                     {{ with $grantPermissions }}
-                        # Not using `Get-Acl`/`Set-Acl` to avoid adjusting token privileges
-                        $parentDirectory = [System.IO.Path]::GetDirectoryName($expandedPath)
-                        $fileName = [System.IO.Path]::GetFileName($expandedPath)
-                        if ($parentDirectory -like '*[*?]*') {
-                            throw "Unable to grant permissions to glob path parent directory: `"$parentDirectory`", wildcards in parent directory are not supported by ``takeown`` and ``icacls``."
-                        }
-                        if (($fileName -ne '*') -and ($fileName -like '*[*?]*')) {
-                            throw "Unable to grant permissions to glob path file name: `"$fileName`", wildcards in file name is not supported by ``takeown`` and ``icacls``."
-                        }
-                        Write-Host "Taking ownership of `"$expandedPath`"."
-                        $cmdPath = $expandedPath
-                        if ($cmdPath.EndsWith('\')) {
-                            $cmdPath += '\' # Escape trailing backslash for correct handling in batch commands
-                        }
-                        $takeOwnershipCommand = "takeown /f `"$cmdPath`" /a" # `icacls /setowner` does not succeed, so use `takeown` instead.
-                        if (-not (Test-Path -Path "$expandedPath" -PathType Leaf)) {
-                            $localizedYes = 'Y' # Default 'Yes' flag (fallback)
+                        $repairAttempted = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+                        function Repair-CleanupAccess($target, $failure) {
+                            if ($failure.Exception.GetBaseException() -isnot [UnauthorizedAccessException] -and $failure.CategoryInfo.Category -ne 'PermissionDenied') { return $false }
+                            if (-not $repairAttempted.Add($target)) { return $false }
                             try {
-                                $choiceOutput = cmd /c "choice <nul 2>nul"
-                                if ($choiceOutput -and $choiceOutput.Length -ge 2) {
-                                    $localizedYes = $choiceOutput[1]
-                                } else {
-                                    Write-Warning "Failed to determine localized 'Yes' character. Output: `"$choiceOutput`""
-                                }
+                                Write-Host "Checking permission-repair target: $target"
+                                if ([IO.File]::GetAttributes($target) -band [IO.FileAttributes]::ReparsePoint) { return $false }
+                                Write-Host "Taking ownership of denied item: $target"
+                                '' | & "$env:SystemRoot\System32\takeown.exe" /f $target /a 2>&1 | ForEach-Object { Write-Host $_ }
+                                $ownerExit = $LASTEXITCODE
+                                Write-Host "Granting access to denied item: $target (takeown exit: $ownerExit)"
+                                '' | & "$env:SystemRoot\System32\icacls.exe" $target /grant '*S-1-5-32-544:F' /l 2>&1 | ForEach-Object { Write-Host $_ }
+                                $aclExit = $LASTEXITCODE
+                                Write-Host "Permission repair finished: $target (icacls exit: $aclExit)"
+                                return ($aclExit -eq 0)
+                            } catch [System.Management.Automation.PipelineStoppedException] { throw
                             } catch {
-                                Write-Warning "Failed to determine localized 'Yes' character. Error: $_"
-                            }
-                            $takeOwnershipCommand += " /r /d $localizedYes"
-                        }
-                        $takeOwnershipOutput = cmd /c "$takeOwnershipCommand 2>&1" # `stderr` message is misleading, e.g. "ERROR: The system cannot find the file specified." is not an error.
-                        if ($LASTEXITCODE -eq 0) {
-                            Write-Host "Successfully took ownership of `"$expandedPath`" (using ``$takeOwnershipCommand``)."
-                        } else {
-                            Write-Host "Did not take ownership of `"$expandedPath`" using ``$takeOwnershipCommand``, status code: $LASTEXITCODE, message: $takeOwnershipOutput."
-                            # Do not write as error or warning, because this can be due to missing path, it's handled in next command.
-                            # `takeown` exits with status code `1`, making it hard to handle missing path here.
-                        }
-                        Write-Host "Granting permissions for `"$expandedPath`"."
-                        $adminSid = New-Object System.Security.Principal.SecurityIdentifier 'S-1-5-32-544'
-                        $adminAccount = $adminSid.Translate([System.Security.Principal.NTAccount])
-                        $adminAccountName = $adminAccount.Value
-                        $grantPermissionsCommand = "icacls `"$cmdPath`" /grant `"$($adminAccountName):F`" /t"
-                        $icaclsOutput = cmd /c "$grantPermissionsCommand"
-                        if ($LASTEXITCODE -eq 3) {
-                            Write-Host "Skipping, no items available for deletion according to: ``$grantPermissionsCommand``."
-                            exit 0
-                        } elseif ($LASTEXITCODE -ne 0) {
-                            Write-Host "Take ownership message:`n$takeOwnershipOutput"
-                            Write-Host "Grant permissions:`n$icaclsOutput"
-                            Write-Warning "Failed to assign permissions for `"$expandedPath`" using ``$grantPermissionsCommand``, status code: $LASTEXITCODE."
-                        } else {
-                            $fileStats = $icaclsOutput | ForEach-Object { $_ -match '\d+' | Out-Null; $matches[0] } | Where-Object { $_ -ne $null } | ForEach-Object { [int]$_ }
-                            if ($fileStats.Count -gt 0 -and ($fileStats | ForEach-Object { $_ -eq 0 } | Where-Object { $_ -eq $false }).Count -eq 0) {
-                                Write-Host "Skipping, no items available for deletion according to: ``$grantPermissionsCommand``."
-                                exit 0
-                            } else {
-                                Write-Host "Successfully granted permissions for `"$expandedPath`" (using ``$grantPermissionsCommand``)."
+                                Write-Warning "Permission repair failed: $target : $_"
+                                return $false
                             }
                         }
                     {{ end }}
-                    $deletedCount = 0
-                    $failedCount = 0
                     {{ with $beforeIteration }}
                         {{ . }}
                     {{ end }}
-                duringIteration: |-
-                    {{ with $duringIteration }}
-                        {{ . }}
-                    {{ end }}
-                    if (-not (Test-Path $path)) { # Re-check existence as prior deletions might remove subsequent items (e.g., subdirectories).
-                        Write-Host "Successfully deleted: $($path) (already deleted)."
-                        $deletedCount++
-                        continue
-                    } 
-                    try {
-                        Remove-Item -Path $path -Force -Recurse -ErrorAction Stop
-                        $deletedCount++
-                        Write-Host "Successfully deleted: $($path)"
-                    } catch {
-                        $failedCount++
-                        Write-Warning "Unable to delete $($path): $_"
+                    $keepRoot = $recurse -and $expandedPath.EndsWith('\*')
+                    $rootPattern = $expandedPath
+                    if ($keepRoot) { $rootPattern = $expandedPath.Substring(0, $expandedPath.Length - 1) }
+                    Write-Host "Resolving cleanup roots: $rootPattern"
+                    $lookupErrors = @()
+                    $roots = @(Get-Item -Path $rootPattern -Force -ErrorAction SilentlyContinue -ErrorVariable lookupErrors)
+                    foreach ($failure in $lookupErrors) {
+                        if ($failure.Exception -is [System.Management.Automation.ItemNotFoundException]) {
+                            $absentCount++
+                            Write-Host "Already absent: $rootPattern"
+                        } else { $failedCount++; Write-Warning "Root lookup failed: $rootPattern : $failure" }
                     }
-                afterIteration: |-
+                    foreach ($root in $roots) {
+                        $rootPath = $root.FullName
+                        if ($rootPath.Length -gt [IO.Path]::GetPathRoot($rootPath).Length) { $rootPath = $rootPath.TrimEnd('\') }
+                        $blocked = $false
+                        try {
+                            $ancestor = $rootPath
+                            while ($ancestor) {
+                                Write-Host "Checking root/ancestor: $ancestor"
+                                if ([IO.File]::GetAttributes($ancestor) -band [IO.FileAttributes]::ReparsePoint) {
+                                    $linkCount++; $blocked = $true
+                                    Write-Warning "Retaining root through reparse point: $ancestor"
+                                    break
+                                }
+                                $ancestor = [IO.Path]::GetDirectoryName($ancestor.TrimEnd('\'))
+                            }
+                        } catch [System.Management.Automation.PipelineStoppedException] { throw
+                        } catch { $failedCount++; $blocked = $true; Write-Warning "Root inspection failed: $rootPath : $_" }
+                        if ($blocked -or -not $scheduled.Add($rootPath)) { continue }
+                        $pending.Push(@{ Path = $rootPath; Leave = $false; Keep = $keepRoot })
+                        while ($pending.Count -gt 0) {
+                            $frame = $pending.Pop()
+                            $path = $frame.Path
+                            Write-Host "Inspecting: $path"
+                            try { $item = Get-Item -LiteralPath $path -Force -ErrorAction Stop
+                            } catch [System.Management.Automation.ItemNotFoundException] {
+                                $absentCount++; Write-Host "Already absent: $path"; continue
+                            } catch [System.Management.Automation.PipelineStoppedException] { throw
+                            } catch { $failedCount++; Write-Warning "Inspection failed: $path : $_"; continue }
+                            if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+                                $linkCount++; Write-Warning "Retaining reparse point: $path"; continue
+                            }
+                            if ($item.PSIsContainer -and $recurse -and -not $frame.Leave) {
+                                $listed = $false
+                                for ($attempt = 0; $attempt -lt 2; $attempt++) {
+                                    try {
+                                        Write-Host "Enumerating directory: $path"
+                                        $children = @(Get-ChildItem -LiteralPath $path -Force -ErrorAction Stop)
+                                        $listed = $true
+                                        break
+                                    } catch [System.Management.Automation.PipelineStoppedException] { throw
+                                    } catch {
+                                        {{ with $grantPermissions }}if ($attempt -eq 0 -and (Repair-CleanupAccess $path $_)) { continue }{{ end }}
+                                        $failedCount++; Write-Warning "Enumeration failed; retaining directory: $path : $_"
+                                        break
+                                    }
+                                }
+                                if (-not $listed) { continue }
+                                if (-not $frame.Keep) { $pending.Push(@{ Path = $path; Leave = $true; Keep = $false }) }
+                                foreach ($child in $children) {
+                                    if ($scheduled.Add($child.FullName)) { $pending.Push(@{ Path = $child.FullName; Leave = $false; Keep = $false }) }
+                                }
+                                continue
+                            }
+                            if ($frame.Keep) { continue }
+                            {{ with $duringIteration }}{{ . }}{{ end }}
+                            for ($attempt = 0; $attempt -lt 2; $attempt++) {
+                                try {
+                                    Write-Host "Deleting: $path"
+                                    $attributes = [IO.File]::GetAttributes($path)
+                                    if ($attributes -band [IO.FileAttributes]::ReparsePoint) { $linkCount++; Write-Warning "Retaining changed reparse point: $path"; break }
+                                    if ($attributes -band [IO.FileAttributes]::ReadOnly) { [IO.File]::SetAttributes($path, $attributes -band (-bnot [IO.FileAttributes]::ReadOnly)) }
+                                    if ($item.PSIsContainer) { [IO.Directory]::Delete($path, $false) } else { [IO.File]::Delete($path) }
+                                    $deletedCount++
+                                    Write-Host "Deleted ($deletedCount): $path"
+                                    break
+                                } catch [System.Management.Automation.PipelineStoppedException] { throw
+                                } catch {
+                                    $cause = $_.Exception.GetBaseException()
+                                    if ($cause -is [IO.FileNotFoundException] -or $cause -is [IO.DirectoryNotFoundException]) { $absentCount++; Write-Host "Already absent: $path"; break }
+                                    {{ with $grantPermissions }}if ($attempt -eq 0 -and (Repair-CleanupAccess $path $_)) { continue }{{ end }}
+                                    $failedCount++; Write-Warning "Deletion failed; no subtree retry: $path : $_"
+                                    break
+                                }
+                            }
+                        }
+                    }
                     {{ with $afterIteration }}
                         {{ . }}
                     {{ end }}
-                    Write-Host "Successfully deleted $($deletedCount) items."
-                    if ($failedCount -gt 0) {
-                        Write-Warning "Failed to delete $($failedCount) items."
-                    }
+                    Write-Host "Cleanup finished: deleted=$deletedCount; absent=$absentCount; preserved=$skippedCount; reparse=$linkCount; failed=$failedCount."
+                    if ($failedCount -gt 0 -or $linkCount -gt 0) { Write-Warning 'Cleanup incomplete. Review the paths reported above; retained items were not retried recursively.' }
     -
         name: ClearDirectoryContents
         # 💡 Purpose:
@@ -41698,7 +41641,7 @@ functions:
         #   - Provides a user-friendly comment in code.
         parameters:
             - name: directoryGlob       # The directory to delete along with its files and subdirectories
-            - name: grantPermissions    # Grants permission on the parent directory and its sub-items recursively (including all files and directories) to be able to delete them.
+            - name: grantPermissions    # Allows one nonrecursive permission repair per denied item.
               optional: true
             - name: beforeIteration     # (Iteration callback) Code to run before iteration.
               optional: true
@@ -41731,7 +41674,7 @@ functions:
         #   Use `DeleteDirectory` or `ClearDirectoryContents` to delete directories.
         parameters:
             - name: fileGlob            # File glob pattern to delete.
-            - name: grantPermissions    # Grants permission on the files found, and restores original permissions after modification.
+            - name: grantPermissions    # Allows one nonrecursive permission repair per denied item; changed permissions are not restored.
               optional: true
         call:
             -
@@ -41747,7 +41690,7 @@ functions:
                     beforeIteration: |-
                         $skippedCount = 0
                     duringIteration: |-
-                        if (Test-Path -Path $path -PathType Container) {
+                        if ($item.PSIsContainer) {
                             Write-Host "Skipping, the path is not a file but a folder: $($path)."
                             $skippedCount++
                             continue

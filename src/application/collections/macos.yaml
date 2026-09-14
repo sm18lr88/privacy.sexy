@@ -664,15 +664,15 @@ actions:
                         name: Clear Gradle cache
                         recommend: strict
                         code: |-
-                            if [ -d "~/.gradle/caches" ]; then
-                                rm -rfv ~/.gradle/caches/ &> /dev/null
+                            if [ -d "$HOME/.gradle/caches" ]; then
+                                rm -rfv -- "$HOME/.gradle/caches/" &> /dev/null
                             fi
                     -
                         name: Clear Dropbox cache
                         recommend: standard
                         code: |-
-                            if [ -d "~/Dropbox/.dropbox.cache" ]; then
-                                sudo rm -rfv ~/Dropbox/.dropbox.cache/* &>/dev/null
+                            if [ -d "$HOME/Dropbox/.dropbox.cache" ]; then
+                                sudo rm -rfv -- "$HOME/Dropbox/.dropbox.cache/"* &>/dev/null
                             fi
                     -
                         name: Clear Google Drive File Stream cache
@@ -693,7 +693,7 @@ actions:
                         code: |-
                             if type "brew" &>/dev/null; then
                                 brew cleanup -s &>/dev/null
-                                rm -rfv $(brew --cache) &>/dev/null
+                                rm -rfv -- "$(brew --cache)" &>/dev/null
                                 brew tap --repair &>/dev/null
                             fi
                     -
@@ -1260,11 +1260,14 @@ actions:
 
                             By default, on clean installations the value is `0` which is equivalent of `no`.
 
-                            There is also `WelcomeScreenPromo.PromoOff` setting that's pre-configured to `1` (`no` as
-                            default). It's undocumented but still kept disabled by this script.
+                            The undocumented `WelcomeScreenPromo.PromoOff` setting was observed as `1` (`yes`).
+                            Both apply and revert retain that value. Revert resets `ProductPromo.ForcePromoOff` to `no`;
+                            it does not restore a captured previous configuration.
+                            These legacy preferences are not verified on current Parallels releases. Parallels does not document
+                            a supported mechanism to completely disable all notifications [2].
 
                             [1]: https://web.archive.org/web/20240314062932/https://forum.parallels.com/threads/unable-to-process-the-upgrade-request.345603/ "Unable to process the upgrade request | Parallels Forums | forum.parallels.com"
-                            [2]: https://web.archive.org/web/20221012151800/https://kb.parallels.com/114422 "How do I turn off notifications in Parallels Desktop and Parallels Access? | Knowledge Base | parallels.com"
+                            [2]: https://kb.parallels.com/114422 "How do I turn off notifications in Parallels Desktop? | Parallels Knowledge Base"
                         code: |-
                             defaults write 'com.parallels.Parallels Desktop' 'ProductPromo.ForcePromoOff' -bool yes
                             defaults write 'com.parallels.Parallels Desktop' 'WelcomeScreenPromo.PromoOff' -bool yes
@@ -2668,7 +2671,10 @@ functions:
             parameters:
                 code: |-
                     glob_pattern="{{ $pathGlob }}"
-                    {{ with $grantPermissions }}sudo{{ end }} rm -{{ with $recurse }}r{{end}}fv $glob_pattern
+                    (
+                        IFS=
+                        {{ with $grantPermissions }}sudo{{ end }} rm -{{ with $recurse }}r{{end}}fv -- $glob_pattern
+                    )
     -
         name: DeleteFiles
         # 💡 Purpose:
