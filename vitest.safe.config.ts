@@ -14,6 +14,7 @@ export default mergeConfig(
         'tests/unit/**/*.spec.ts',
         'tests/integration/application/**/*.spec.ts',
         'tests/integration/presentation/components/Shared/Hooks/UseAutoUnsubscribedEventListener.spec.ts',
+        'tests/integration/presentation/bootstrapping/Modules/MobileSafariActivePseudoClassEnabler.spec.ts',
       ],
       setupFiles: [
         `${REPOSITORY_ROOT}/tests/shared/bootstrap/SafeApplicationBoundaries.ts`,
