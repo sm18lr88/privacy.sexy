@@ -119,10 +119,19 @@
 </p>
 <!-- markdownlint-restore -->
 
+## Overview
+
+privacy.sexy helps you review, select, and apply privacy and security settings for Windows, macOS, and Linux. Use the [web application](https://privacy.sexy) in a browser, or download a desktop release when you need to work offline.
+
 ## Get started
 
+Choose the web app or a desktop release below, then follow [Usage](#usage).
+Contributors should start with the [development guide](./docs/development.md#non-executing-validation-on-personal-computers).
+
+## Installation
+
 - 🌍️ **Online**: [https://privacy.sexy](https://privacy.sexy).
-- 🖥️ **Offline**: Download directly for: [Windows](https://github.com/undergroundwires/privacy.sexy/releases/download/0.13.8/privacy.sexy-Setup-0.13.8.exe), [macOS](https://github.com/undergroundwires/privacy.sexy/releases/download/0.13.8/privacy.sexy-0.13.8.dmg), [Linux](https://github.com/undergroundwires/privacy.sexy/releases/download/0.13.8/privacy.sexy-0.13.8.AppImage). For more options, see [here](#additional-install-options).
+- 🖥️ **Offline**: Download directly for: [Windows](https://github.com/undergroundwires/privacy.sexy/releases/download/0.13.8/privacy.sexy-Setup-0.13.8.exe), [macOS](https://github.com/undergroundwires/privacy.sexy/releases/download/0.13.8/privacy.sexy-0.13.8.dmg), [Linux](https://github.com/undergroundwires/privacy.sexy/releases/download/0.13.8/privacy.sexy-0.13.8.AppImage). See also [additional install options](#additional-install-options).
 
 See also:
 
@@ -132,6 +141,15 @@ See also:
 💡 Regularly applying your configuration with privacy.sexy is recommended, especially after each new release and major operating system updates. Each version updates scripts to enhance stability, privacy, and security.
 
 [![privacy.sexy application](img/screenshot.png?raw=true )](https://privacy.sexy)
+
+## Usage
+
+1. Open the web or desktop app and choose your operating system.
+2. Read each script's documentation, applicability, and warnings before selecting it.
+3. Review the generated code. Selecting an option in the web app generates text; it does not apply changes to your computer.
+
+Revert support does not recover deleted data or guarantee recovery of every system change.
+Use disposable machines to test scripts, not your personal or production computer.
 
 ## Features
 
@@ -148,7 +166,7 @@ See also:
 
 ## Support
 
-**Sponsor 💕**. Consider sponsoring on [GitHub Sponsors](https://github.com/sponsors/undergroundwires), or you can donate using [other ways such as crypto or a coffee](https://undergroundwires.dev/donate).
+**Sponsor 💕**. Consider sponsoring on [GitHub Sponsors](https://github.com/sponsors/undergroundwires), or you can donate using [other ways such as crypto or a coffee](https://undergroundwires.dev/donate/).
 
 **Star 🤩**. Feel free to give it a star ⭐ .
 
@@ -177,9 +195,24 @@ See also:
 
 Refer to [development.md](./docs/development.md) for Docker usage and reading more about setting up your development environment.
 
+For common contributor tasks, start with:
+
+- [Development guide](./docs/development.md): setup, safe local validation, and development commands.
+- [Test guide](./docs/tests.md): test suites and their scope.
+- [CI/CD guide](./docs/ci-cd.md): automated checks and release pipelines.
+- [Maintenance assessment](./docs/maintenance-assessment.md): verified maintenance work and remaining release gates.
+
 Check [architecture.md](./docs/architecture.md) for an overview of design and how different parts and layers work together. You can refer to [application.md](./docs/application.md) for a closer look at application layer codebase and [presentation.md](./docs/presentation.md) for code related to GUI layer. [collection-files.md](./docs/collection-files.md) explains the YAML files that are the core of the application and [templating.md](./docs/templating.md) documents how to use templating language in those files. In [ci-cd.md](./docs/ci-cd.md), you can read more about the pipelines that automates maintenance tasks and ensures you get what see.
 
 [docs/](./docs/) folder includes all other documentation.
+
+## Contributing
+
+Contributions are welcome. Read [CONTRIBUTING.md](./CONTRIBUTING.md) for the pull request process, testing expectations, and script contribution guidance.
+
+## License
+
+privacy.sexy is licensed under the [GNU Affero General Public License, version 3](./LICENSE).
 
 ## Security
 
@@ -189,4 +222,4 @@ For any security concerns or vulnerabilities, please consult the [Security Polic
 
 ## Supporters
 
-[![Supporters appreciation banner showing the supporters](https://undergroundwires.dev/img/supporters.jpg)](https://undergroundwires.dev/supporters)
+[![Supporters appreciation banner showing the supporters](https://undergroundwires.dev/img/supporters.jpg)](https://undergroundwires.dev/supporters/)
