@@ -1,4 +1,4 @@
-/// <reference types="vitest" />
+/// <reference types="vitest/config" />
 import { resolve } from 'node:path';
 import { defineConfig, type UserConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
@@ -18,6 +18,7 @@ export function createVueConfig(options?: {
     root: WEB_DIRECTORY,
     build: {
       outDir: resolve(getSelfDirectoryAbsolutePath(), distDirs.web),
+      emptyOutDir: true,
     },
     plugins: [
       vue(),
@@ -60,7 +61,7 @@ export default defineConfig(createVueConfig({
 
 function getStaticHtmlMinificationOptions(): Parameters<typeof ViteMinifyPlugin>[0] {
   return {
-    /* Options: https://www.npmjs.com/package/html-minifier-terser */
+    /* Options: https://www.npmjs.com/package/html-minifier-next */
     minifyCSS: true,
     minifyJS: true,
     removeComments: true,
