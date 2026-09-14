@@ -2,6 +2,10 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "rootDir": "../..",
+    "paths": {
+      "@/*": ["../../src/*"],
+      "@tests/*": ["../../tests/*"]
+    },
     "types": [
       "cypress",
       "node"
