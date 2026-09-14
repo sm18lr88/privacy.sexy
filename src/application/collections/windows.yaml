@@ -1591,7 +1591,7 @@ actions:
                             -
                                 name: Clear Webpage Icons
                                 recommend: standard
-                                docs: https://www.sans.org/blog/safari-browser-forensics/
+                                docs: https://web.archive.org/web/20230602215811/https://www.sans.org/blog/safari-browser-forensics/
                                 call:
                                     - # Windows XP
                                         function: DeleteFiles
@@ -3172,7 +3172,7 @@ actions:
                             > **Caution:**
                             > Disabling app access may affect the functionality of certain Microsoft Store, third-party, and system applications.
 
-                            [1]: https://web.archive.org/web/20240427110714/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#letappsaccesscontacts "Privacy Policy CSP - Windows Client Management | Microsoft Learn | learn.microsoft.com"
+                            [1]: https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-privacy#letappsaccesscontacts "Privacy Policy CSP - Windows Client Management | Microsoft Learn | learn.microsoft.com"
                             [2]: https://web.archive.org/web/20240427120219/https://learn.microsoft.com/en-us/windows/uwp/packaging/app-capability-declarations "App capability declarations - UWP applications | Microsoft Learn | learn.microsoft.com"
                             [3]: https://web.archive.org/web/20230911110911/https://learn.microsoft.com/en-us/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services#188-contacts "Manage connections from Windows 10 and Windows 11 Server/Enterprise editions operating system components to Microsoft services - Windows Privacy | Microsoft Learn | learn.microsoft.com"
                             [4]: https://web.archive.org/web/20240427103845/https://www.c-amie.co.uk/technical/windows-10-registry-paths-for-privacy-settings/ "Windows 10 Registry Paths for Privacy Settings - C:Amie (not) Com! | c-amie.co.uk"
@@ -17665,7 +17665,7 @@ actions:
 
                             [1]: https://web.archive.org/web/20240409164749/https://support.microsoft.com/en-us/topic/getting-started-with-microsoft-defender-9df0cb0f-4866-4433-9cbc-f83e5cf77693 "Getting started with Microsoft Defender - Microsoft Support | support.microsoft.com"
                             [2]: https://web.archive.org/web/20240819080500/https://support.microsoft.com/en-us/office/stay-protected-with-windows-security-ae70cc96-a9cd-4443-a210-e41cb973d3a6 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
-                            [3]: https://web.archive.org/web/20231103171802/https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
+                            [3]: https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
                             [4]: https://web.archive.org/web/20231006103250/https://privacy.microsoft.com/en-US/privacystatement "Microsoft Privacy Statement – Microsoft privacy | privacy.microsoft.com"
                             [5]: https://web.archive.org/web/20240409170914/https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/cloud-protection-microsoft-defender-antivirus?view=o365-worldwide "Cloud protection and Microsoft Defender Antivirus | Microsoft Learn | learn.microsoft.com"
                             [6]: https://web.archive.org/web/20240409170815/https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/data-storage-privacy?view=o365-worldwide "Microsoft Defender for Endpoint data storage and privacy | Microsoft Learn | learn.microsoft.com"
@@ -20982,7 +20982,7 @@ actions:
                                             | Windows 10 22H2  | 🟢 Ready |
                                             | Windows 11 22H2  | 🟢 Ready |
 
-                                            [1]: https://web.archive.org/web/20231103171802/https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
+                                            [1]: https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
                                             [2]: https://web.archive.org/web/20240829205326/https://github.com/privacysexy-forks/nickel-x64/blob/b3f8c9549e49f2a92b401b3809b210d5f78190ba/WinSxS/Manifests/amd64_windows-defender-service_31bf3856ad364e35_10.0.22621.1_none_273bee824a8ac431.manifest "nickel-x64/WinSxS/Manifests/amd64_windows-defender-service_31bf3856ad364e35_10.0.22621.1_none_273bee824a8ac431.manifest at b3f8c9549e49f2a92b401b3809b210d5f78190ba · privacysexy-forks/nickel-x64 | github.com"
                                             [3]: https://web.archive.org/web/20231103171350/https://www.herdprotect.com/mpcmdrun.exe-bb31a13a0eeecfab745d4aa221ee222d5021e9d8.aspx "Malware scan of MpCmdRun.exe (Microsoft Malware Protection) bb31a13a0eeecfab745d4aa221ee222d5021e9d8 - herdProtect | herdprotect.com"
                                             [4]: https://web.archive.org/web/20231103171825/http://windows.fyicenter.com/4441_Windows_Defender_Scheduled_Scan_Scheduled_Task_on_Windows_8.html '"Windows Defender Scheduled Scan" Scheduled Task on Windows 8 | windows.fyicenter.com'
@@ -24173,7 +24173,7 @@ actions:
                             > Consider alternative security measures if you disable Windows Security components.
 
                             [1]: https://web.archive.org/web/20240819080500/https://support.microsoft.com/en-us/office/stay-protected-with-windows-security-ae70cc96-a9cd-4443-a210-e41cb973d3a6 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
-                            [2]: https://web.archive.org/web/20231103171802/https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
+                            [2]: https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
                             [3]: https://web.archive.org/web/20240819081122/https://betawiki.net/wiki/Windows_10_build_17093 "Windows 10 build 17093 - BetaWiki | betawiki.net"
                             [4]: https://web.archive.org/web/20240819081301/https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-10/whats-new/whats-new-windows-10-version-1809#windows-security-center "What's new in Windows 10, version 1809 - Windows 10 | Microsoft Learn | learn.microsoft.com"
                             [5]: https://web.archive.org/web/20201219170833/https://www.digitalcitizen.life/windows-defender-windows-8-and-windows-7-what-s-new-and-different/ "Windows Defender in Windows 8 and Windows 7 - What's New & Different? | Digital Citizen | www.digitalcitizen.life"
@@ -24611,7 +24611,7 @@ actions:
                                             [1]: https://web.archive.org/web/20240829161045/https://strontic.github.io/xcyclopedia/library/SecurityHealthSSO.dll-3C4BE8F167045062380124D2D5BE8C1B.html "SecurityHealthSSO.dll | Security Health SSO | STRONTIC | strontic.github.io"
                                             [2]: https://web.archive.org/web/20240829161040/https://strontic.github.io/xcyclopedia/library/clsid_6D40A6F9-3D32-4FCB-8A86-BE992E03DC76.html "CLSID 6D40A6F9-3D32-4FCB-8A86-BE992E03DC76 | CLSID_DefenderShellServiceObject | STRONTIC | strontic.github.io"
                                             [3]: https://web.archive.org/web/20240829161005/https://www.thewindowsclub.com/securityhealthsystray-exe-bad-image-what-is-it "SecurityHealthSystray.exe Bad Image; What is it? | www.thewindowsclub.com"
-                                            [4]: https://web.archive.org/web/20231103171802/https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
+                                            [4]: https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
                                             [5]: https://web.archive.org/web/20240829161012/https://oshibaetsya.ru/securityhealthsystray-exe-oshibka/ "Securityhealthsystray exe ошибка - Не ошибается лишь тот, кто ничего не делает! | oshibaetsya.ru"
                                             [6]: https://web.archive.org/web/20240829161654/https://learn.microsoft.com/en-us/windows/win32/shell/notification-area "Notifications and the Notification Area - Win32 apps | Microsoft Learn | learn.microsoft.com"
                                             [7]: https://web.archive.org/web/20241001125912/https://github.com/privacysexy-forks/10_0_22000_1165/blob/92680a67167c80bd9f2c8e58bd304b801a18860d/C/Windows/System32/SecurityHealthSsoUdk.dll.strings "10_0_22000_1165/C/Windows/System32/SecurityHealthSsoUdk.dll.strings at 92680a67167c80bd9f2c8e58bd304b801a18860d · privacysexy-forks/10_0_22000_1165 | github.com"
@@ -24697,7 +24697,7 @@ actions:
                                             [2]: https://web.archive.org/web/20231013153902/https://learn.microsoft.com/en-us/windows/security/operating-system-security/system-security/windows-defender-security-center/windows-defender-security-center "Windows Security - Windows Security | Microsoft Learn"
                                             [3]: https://web.archive.org/web/20231013160352/https://strontic.github.io/xcyclopedia/library/SecurityHealthService.exe-96BE970B2CB0BB0A86D8F74C1A3F8596.html "SecurityHealthService.exe | Windows Security Health Service | STRONTIC | strontic.github.io"
                                             [4]: https://web.archive.org/web/20231013160458/https://learn.microsoft.com/en-us/microsoft-365/security/defender-endpoint/microsoft-defender-antivirus-compatibility?view=o365-worldwide#notes-about-protection-states
-                                            [5]: https://web.archive.org/web/20231103171802/https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
+                                            [5]: https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
                                             [6]: https://web.archive.org/web/20240912123628/https://github.com/privacysexy-forks/nickel-x64/blob/b3f8c9549e49f2a92b401b3809b210d5f78190ba/WinSxS/Manifests/amd64_windows-shield-provider_31bf3856ad364e35_10.0.22621.1_none_078b8e81c1191957.manifest "nickel-x64/WinSxS/Manifests/amd64_windows-shield-provider_31bf3856ad364e35_10.0.22621.1_none_078b8e81c1191957.manifest at b3f8c9549e49f2a92b401b3809b210d5f78190ba · privacysexy-forks/nickel-x64 | github.com"
                                         call:
                                             -
@@ -25046,7 +25046,7 @@ actions:
 
                                             [1]: https://web.archive.org/web/20240912171920/https://www.file.net/process/securityhealthhost.exe.html "SecurityHealthHost.exe Windows process - What is it? | www.file.net"
                                             [2]: https://web.archive.org/web/20230708061253/https://malwaretips.com/blogs/securityhealthhost-exe/ "SecurityHealthHost.exe - Is SecurityHealthHost.exe Safe Or Malware? | malwaretips.com"
-                                            [3]: https://web.archive.org/web/20231103171802/https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
+                                            [3]: https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
                                             [4]: https://web.archive.org/web/20240912123628/https://github.com/privacysexy-forks/nickel-x64/blob/b3f8c9549e49f2a92b401b3809b210d5f78190ba/WinSxS/Manifests/amd64_windows-shield-provider_31bf3856ad364e35_10.0.22621.1_none_078b8e81c1191957.manifest "nickel-x64/WinSxS/Manifests/amd64_windows-shield-provider_31bf3856ad364e35_10.0.22621.1_none_078b8e81c1191957.manifest at b3f8c9549e49f2a92b401b3809b210d5f78190ba · privacysexy-forks/nickel-x64 | github.com"
                                             [5]: https://web.archive.org/web/20240912171905/https://strontic.github.io/xcyclopedia/library/SecurityHealthHost.exe-672C2568647CE3A4F06A1CB466490AB7.html "SecurityHealthHost.exe | Windows Security Health Host | STRONTIC | strontic.github.io"
                                         call:
@@ -25114,7 +25114,7 @@ actions:
                                             - Security Health Agent Interactive User Host (`7E55A26D-EF95-4A45-9F55-21E52ADF9887`) [16] [21] [22] [25] [26]
                                             - Security Health Agent Interactive User Host for WDSP only (`4fe95d37-3459-4ecc-ac3e-f7abbe4e8aed`) [26]
 
-                                            [1]: https://web.archive.org/web/20231103171802/https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
+                                            [1]: https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
                                             [2]: https://web.archive.org/web/20231013153902/https://learn.microsoft.com/en-us/windows/security/operating-system-security/system-security/windows-defender-security-center/windows-defender-security-center "Windows Security - Windows Security | Microsoft Learn"
                                             [3]: https://web.archive.org/web/20240913071811/https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-wsh/9a16cf36-da15-454d-aeaa-600df49efa98 "[MS-WSH]: Windows Security Health Agent (WSHA) and Windows Security Health Validator (WSHV) Protocol | Microsoft Learn | learn.microsoft.com"
                                             [4]: https://web.archive.org/web/20240912123628/https://github.com/privacysexy-forks/nickel-x64/blob/b3f8c9549e49f2a92b401b3809b210d5f78190ba/WinSxS/Manifests/amd64_windows-shield-provider_31bf3856ad364e35_10.0.22621.1_none_078b8e81c1191957.manifest "nickel-x64/WinSxS/Manifests/amd64_windows-shield-provider_31bf3856ad364e35_10.0.22621.1_none_078b8e81c1191957.manifest at b3f8c9549e49f2a92b401b3809b210d5f78190ba · privacysexy-forks/nickel-x64 | github.com"
@@ -25368,7 +25368,7 @@ actions:
                                             [1]: https://web.archive.org/web/20240930094238/https://batcmd.com/windows/11/services/wscsvc/ "Security Center - Windows 11 Service - batcmd.com | batcmd.com"
                                             [2]: https://web.archive.org/web/20240930094831/https://revertservice.com/10/wscsvc/ "Security Center (wscsvc) Service Defaults in Windows 10 | revertservice.com"
                                             [3]: https://web.archive.org/web/20231013153902/https://learn.microsoft.com/en-us/windows/security/operating-system-security/system-security/windows-defender-security-center/windows-defender-security-center "Windows Security - Windows Security | Microsoft Learn"
-                                            [4]: https://web.archive.org/web/20231103171802/https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
+                                            [4]: https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
                                             [5]: https://web.archive.org/web/20240930093428/https://learn.microsoft.com/en-us/defender-endpoint/microsoft-defender-antivirus-compatibility "Microsoft Defender Antivirus compatibility with other security products - Microsoft Defender for Endpoint | Microsoft Learn | learn.microsoft.com"
                                         call:
                                             -
@@ -26540,7 +26540,7 @@ actions:
                                                     - Modifies user interface settings to prevent the display of notifications via
                                                       `HKLM\SOFTWARE\Microsoft\Windows Defender Security Center\Notifications` [5].
 
-                                                    [1]: https://web.archive.org/web/20231103171802/https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
+                                                    [1]: https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
                                                     [2]: https://web.archive.org/web/20240314122250/https://learn.microsoft.com/en-us/windows/client-management/mdm/policy-csp-windowsdefendersecuritycenter#disablenotifications "WindowsDefenderSecurityCenter Policy CSP - Windows Client Management | Microsoft Learn | learn.microsoft.com"
                                                     [3]: https://web.archive.org/web/20240902101758/https://admx.help/?Category=Windows_10_2016&Policy=Microsoft.Policies.WindowsDefenderSecurityCenter::Notifications_DisableNotifications "Hide all notifications | admx.help"
                                                     [4]: https://archive.ph/2024.08.31-162733/https://github.com/privacysexy-forks/nickel-x64/blob/b3f8c9549e49f2a92b401b3809b210d5f78190ba/WinSxS/Manifests/amd64_microsoft-windows-securitycenter-core_31bf3856ad364e35_10.0.22621.1_none_7bd62966a5d70680.manifest "nickel-x64/WinSxS/Manifests/amd64_microsoft-windows-securitycenter-core_31bf3856ad364e35_10.0.22621.1_none_7bd62966a5d70680.manifest at b3f8c9549e49f2a92b401b3809b210d5f78190ba · privacysexy-forks/nickel-x64 | github.com"
@@ -26627,7 +26627,7 @@ actions:
 
                                                     [1]: https://archive.ph/2024.08.31-162733/https://github.com/privacysexy-forks/nickel-x64/blob/b3f8c9549e49f2a92b401b3809b210d5f78190ba/WinSxS/Manifests/amd64_microsoft-windows-securitycenter-core_31bf3856ad364e35_10.0.22621.1_none_7bd62966a5d70680.manifest "nickel-x64/WinSxS/Manifests/amd64_microsoft-windows-securitycenter-core_31bf3856ad364e35_10.0.22621.1_none_7bd62966a5d70680.manifest at b3f8c9549e49f2a92b401b3809b210d5f78190ba · privacysexy-forks/nickel-x64 | github.com"
                                                     [2]: https://web.archive.org/web/20240902112044/https://github.com/privacysexy-forks/10_0_22622_601/blob/c598035e1a6627384d646140fe9e4d234b36b11d/C/Windows/System32/SecurityHealthAgent.dll.strings "10_0_22622_601/C/Windows/System32/SecurityHealthAgent.dll.strings at c598035e1a6627384d646140fe9e4d234b36b11d · privacysexy-forks/10_0_22622_601 | github.com"
-                                                    [3]: https://web.archive.org/web/20231103171802/https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
+                                                    [3]: https://support.microsoft.com/en-us/windows/stay-protected-with-windows-security-2ae0363d-0ada-c064-8b56-6a39afb6a963 "Stay protected with Windows Security - Microsoft Support | support.microsoft.com"
                                                     [4]: https://web.archive.org/web/20240902090450/https://learn.microsoft.com/en-us/windows/win32/shell/appids "Application User Model IDs (AppUserModelIDs) - Win32 apps | Microsoft Learn | learn.microsoft.com"
                                                 call:
                                                     -

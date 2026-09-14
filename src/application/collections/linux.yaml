@@ -3234,7 +3234,7 @@ actions:
                   If this blocking is removed, the user should be knowledgeable about the potential risks and will take precautions.
 
                   [1]: https://web.archive.org/web/20221026164502/https://wiki.mozilla.org/Security/Safe_Browsing#Prefs "Security/Safe Browsing - MozillaWiki | wiki.mozilla.org"
-                  [2]: https://web.archive.org/web/20230811024650/https://blog.mozilla.org/addons/2020/08/24/introducing-a-scalable-add-ons-blocklist/ "Introducing a scalable add-ons blocklist | Mozilla Add-ons Community Blog"
+                  [2]: https://blog.mozilla.org/addons/2020/08/24/introducing-a-scalable-add-ons-blocklist/ "Introducing a scalable add-ons blocklist | Mozilla Add-ons Community Blog"
                 call:
                   function: AddFirefoxPrefs
                   parameters:
