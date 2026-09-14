@@ -37,7 +37,7 @@ export const STDERR_IGNORE_PATTERNS: readonly RegExp[] = [
       [3621:0828/162503.420173:ERROR:command_buffer_proxy_impl.cc(128)] ContextResult::kTransientFailure: Failed to send GpuControl.CreateCommandBuffer.
   */
   /ERROR:viz_main_impl\.cc.*?Exiting GPU process due to errors during initialization/,
-  /ERROR:command_buffer_proxy_impl\.cc.*?ContextResult::kTransientFailure: Failed to send GpuControl\.CreateCommandBuffer\./,
+  /ERROR:(?:gpu\/ipc\/client\/)?command_buffer_proxy_impl\.cc.*?ContextResult::kTransientFailure: Failed to send GpuControl\.CreateCommandBuffer\./,
 
   /*
    OS: macOS (GitHub Actions)
